@@ -3,7 +3,7 @@ import { prisma } from "../../lib/prisma"
 import { ILoginUser, IPostUser } from "./auth.interface"
 import config from "../../config"
 import { jwtUtils } from "../../utils/jwt"
-import { JwtPayload, SignOptions } from "jsonwebtoken"
+import { SignOptions } from "jsonwebtoken"
 
 const postUserIntoDB = async (payload: IPostUser) => {
     const {name,email,phone, password, profilePhoto, bio} = payload
@@ -72,40 +72,21 @@ const loginUser = async (payload: ILoginUser) => {
     }
 }
 
-const refreshToken = async (refreshToken: string) => {
-    const verifiedRefreshToken = jwtUtils.verifyToken(refreshToken, config.jwt_refresh_secret);
-
-    if (!verifiedRefreshToken.success) {
-        throw new Error(verifiedRefreshToken.error);
-    }
-    const { id } = verifiedRefreshToken.data as JwtPayload;
+const getMyProfile = async (userId: string) => {
     const user = await prisma.user.findUniqueOrThrow({
         where: {
-            id
+            id: userId
+        },
+        omit: {
+            password: true
         }
     });
 
-    if (user.status === "BANNED") {
-        throw new Error("Your account is banned, please contact support");
-    }
-
-    const jwtPayload = {
-        id,
-        name: user.name,
-        phone: user.phone,
-        email: user.email,
-        role: user.role
-    }
-    const accessToken = jwtUtils.createToken(jwtPayload, config.jwt_access_secret, config.jwt_access_expires_in as SignOptions);
-
-    return {
-        accessToken
-    }
+    return user
 }
-
 
 export const authService = {
     postUserIntoDB,
     loginUser,
-    refreshToken
+    getMyProfile
 }
