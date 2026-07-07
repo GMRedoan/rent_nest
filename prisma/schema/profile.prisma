@@ -3,9 +3,11 @@ model Profile {
     profilePhoto String?
     bio String?
 
-    userId String @unique
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    tenantId String @unique
+    tenant User @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@map("profile")
 }

@@ -1,0 +1,13 @@
+model Review {
+    id String @id @default(uuid())
+    comment String @db.Text
+
+    propertyId String
+    property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+    tenantId String
+    tenant User @relation("TenantReviews", fields: [tenantId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

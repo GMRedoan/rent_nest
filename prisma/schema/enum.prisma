@@ -17,7 +17,7 @@ enum PropertyType {
   COMMERCIAL
 }
 
-enum ListingStatus {
+enum PropertyStatus {
   AVAILABLE
   RENTED
   INACTIVE
