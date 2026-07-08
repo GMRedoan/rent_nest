@@ -3,6 +3,7 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import { authRouter } from "./modules/auth/auth.route";
 import { globalError } from "./middleware/globalError";
+import { landlordRouter } from "./modules/landlord/landlord.route";
 
 const app: Application = express();
 app.use(cors({
@@ -19,6 +20,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/landlord", landlordRouter)
 
 
 app.use(globalError);

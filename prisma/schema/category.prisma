@@ -1,7 +1,6 @@
 model Category {
   id          String    @id @default(uuid())
   name        String    @unique
-  description String?
   properties  Property[]
 
   createdAt DateTime @default(now())

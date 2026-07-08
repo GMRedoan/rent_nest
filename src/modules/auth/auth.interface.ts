@@ -3,8 +3,7 @@ export interface IPostUser  {
     email: string
     phone: string
     password: string
-    profilePhoto?: string;
-    bio?: string
+    role?: 'TENANT' | 'LANDLORD';
 }
 
 export interface ILoginUser {
