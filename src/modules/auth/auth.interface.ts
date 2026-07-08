@@ -6,6 +6,11 @@ export interface IPostUser  {
     role?: 'TENANT' | 'LANDLORD';
 }
 
+export interface IUpdateUserPayload{
+    name?: string
+    phone?: string
+}
+
 export interface ILoginUser {
     email: string
     password: string

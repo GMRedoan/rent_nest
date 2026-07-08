@@ -40,7 +40,8 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMe = catchAsync(async (req: Request, res: Response) => {
-    const profile = await authService.getMyProfile(req.user.id);
+    const userId = req.user?.id
+    const profile = await authService.getMyProfile(userId as string);
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
@@ -49,9 +50,21 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
+const updateUser = catchAsync(async (req: Request, res: Response) => {
+    const payload = req.body;
+    const userId = req.params?.id;
+    const user = await authService.updateUser(payload, userId as string);
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "user updated successfully",
+        data: {user}
+    })
+})
 
 export const authController = {
     postUser,
     loginUser,
-    getMe
+    getMe,
+    updateUser
 }

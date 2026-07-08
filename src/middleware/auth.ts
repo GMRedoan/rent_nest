@@ -62,7 +62,11 @@ export const auth = (...requiredRole: Role[]) => {
         }
 
         req.user = {
-            id, name, phone, email, role
+            id: user.id,
+            name: user.name,
+            phone: user.phone,
+            email: user.email,
+            role: user.role
         }
         next();
     }

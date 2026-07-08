@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs"
 import { prisma } from "../../lib/prisma"
-import { ILoginUser, IPostUser } from "./auth.interface"
+import { ILoginUser, IPostUser, IUpdateUserPayload } from "./auth.interface"
 import config from "../../config"
 import { jwtUtils } from "../../utils/jwt"
 import { SignOptions } from "jsonwebtoken"
@@ -84,8 +84,36 @@ const getMyProfile = async (userId: string) => {
     return user
 }
 
+const updateUser = async(payload: IUpdateUserPayload, userId: string) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId
+        }
+    })
+    if (!user) {
+        throw new Error("user not found");
+    }
+    if(user.status === "BANNED"){
+        throw new Error("user is banned, please contact support");
+    }
+    const updatedUser = await prisma.user.update({
+        where: {
+            id: userId
+        },
+        omit: {
+            password: true
+        },
+        data: {
+            ...payload
+        }
+    })
+    return updatedUser
+
+}
+
 export const authService = {
     postUserIntoDB,
     loginUser,
-    getMyProfile
+    getMyProfile,
+    updateUser
 }
