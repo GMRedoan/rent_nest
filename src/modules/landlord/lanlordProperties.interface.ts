@@ -9,3 +9,13 @@ export interface IProperties {
     images: string[]
     status?: PropertyStatus
 }
+
+export interface IUpdateProperties {
+    title?: string
+    description?: string
+    propertyType?: PropertyType
+    price?: number
+    location?: string
+    images?: string[]
+    status?: PropertyStatus
+}
