@@ -7,5 +7,6 @@ const router = Router();
 
 router.post("/", auth(Role.TENANT), rentalRequestController.createRentalRequest);
 
+router.get("/", auth(Role.TENANT), rentalRequestController.myRentalRequests);
 
 export const rentalRequestRouter = router;

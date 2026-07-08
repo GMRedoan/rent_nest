@@ -1,3 +1,4 @@
+import { RequestStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma"
 import { IProperties, IUpdateProperties } from "./lanlordProperties.interface"
 
@@ -77,9 +78,36 @@ const landlordRentalRequests = async (userId: string) => {
     return rentalRequests
 }
 
+const updateRentalRequest = async (status: RequestStatus, rentalRequestId: string, landlordId: string) => {
+    const rentalRequest = await prisma.rentalRequest.findUnique({
+        where: {
+            id: rentalRequestId
+        },
+        include: {
+            property: true
+        }
+    })
+    if (!rentalRequest) {
+        throw new Error("rental request not found");
+    }
+    if(rentalRequest?.property?.landlordId !== landlordId) {
+        throw new Error("you are not authorized to update this rental request");
+    }
+     const updatedRentalRequest = await prisma.rentalRequest.update({
+        where: {
+            id: rentalRequestId
+        },
+        data: {
+            status
+        }
+    })
+    return updatedRentalRequest 
+}
+
 export const landlordService ={
     createProperties,
     updateProperties,
     deleteProperty,
-    landlordRentalRequests
+    landlordRentalRequests,
+    updateRentalRequest
 }
