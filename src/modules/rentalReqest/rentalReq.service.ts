@@ -47,7 +47,26 @@ const myRentalRequests = async (tenantId: string) => {
     return rentalRequests
 }
 
+const singleRentalRequest = async (rentalRequestId: string) => {
+    const isExist = await prisma.rentalRequest.findUnique({
+        where: {
+            id: rentalRequestId
+        },
+    })
+    if (!isExist) {
+        throw new Error("rental request not found");
+    }
+    const rentalRequest = await prisma.rentalRequest.findUnique({
+        where: {
+            id: rentalRequestId
+        },
+        include: { property: true, payment: true },
+    });
+    return rentalRequest
+}
+
 export const rentalRequestService = {
     createRentalRequest,
-    myRentalRequests
+    myRentalRequests,
+    singleRentalRequest
 };

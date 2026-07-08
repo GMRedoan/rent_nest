@@ -8,6 +8,7 @@ import { propertiesRouter } from "./modules/properties/properties.route";
 import { adminRouter } from "./modules/admin/admin.route";
 import { rentalRequestRouter } from "./modules/rentalReqest/rentalReq.route";
 import { notFound } from "./middleware/notFound";
+import { reviewsRouter } from "./modules/reviews/review.route";
 
 const app: Application = express();
 app.use(cors({
@@ -28,6 +29,7 @@ app.use("/api/landlord", landlordRouter);
 app.use("/api/properties", propertiesRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/rentals", rentalRequestRouter);
+app.use("/api/reviews", reviewsRouter);
 
 app.use(globalError);
 app.use(notFound);
