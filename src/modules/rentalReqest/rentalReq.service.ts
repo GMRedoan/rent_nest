@@ -37,7 +37,6 @@ const createRentalRequest = async (payload: ICreateRentalRequest, tenantId: stri
 };
 
 
-
 export const rentalRequestService = {
     createRentalRequest,
 };

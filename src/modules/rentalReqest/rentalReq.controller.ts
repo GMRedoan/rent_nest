@@ -16,6 +16,7 @@ const createRentalRequest = catchAsync(async(req:Request, res:Response) => {
     })
 })
 
+ 
 export const rentalRequestController = {
-    createRentalRequest
+    createRentalRequest,
 }

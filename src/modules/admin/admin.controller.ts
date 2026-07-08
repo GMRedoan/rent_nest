@@ -35,8 +35,19 @@ const allProperties = catchAsync(async(req:Request, res:Response) => {
     })
 })
 
+const allRentalRequests = catchAsync(async(req:Request, res:Response) => {
+    const rentalRequests = await adminService.allRentalRequests();
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "rental requests retrieved successfully",
+        data: {rentalRequests}
+    })
+})
+
 export const adminController = {
     allUsers,
     updateUserStatus,
-    allProperties
+    allProperties,
+    allRentalRequests
 }

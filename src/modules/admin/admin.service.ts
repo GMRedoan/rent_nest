@@ -32,8 +32,17 @@ const allProperties = async () => {
     return properties
 }
 
+const allRentalRequests = async () => {
+    const requests = await prisma.rentalRequest.findMany({
+        include: { property: true, tenant: { select: { id: true, name: true, email: true } } },
+        orderBy: { createdAt: "desc" }
+    });
+    return requests
+}
+
 export const adminService = {
     allUsers,
     updateUserStatus,
-    allProperties
+    allProperties,
+    allRentalRequests
 }
