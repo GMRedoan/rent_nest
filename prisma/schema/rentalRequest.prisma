@@ -8,8 +8,8 @@ model RentalRequest {
   tenantId String
   tenant   User   @relation("TenantRequests", fields: [tenantId], references: [id], onDelete: Cascade)
 
-  propertiesId String
-  property  Property @relation(fields: [propertiesId], references: [id], onDelete: Cascade)
+  propertyId String
+  property  Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   payment Payment?
 

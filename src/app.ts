@@ -6,6 +6,8 @@ import { globalError } from "./middleware/globalError";
 import { landlordRouter } from "./modules/landlord/landlord.route";
 import { propertiesRouter } from "./modules/properties/properties.route";
 import { adminRouter } from "./modules/admin/admin.route";
+import { rentalRequestRouter } from "./modules/rentalReqest/rentalReq.route";
+import { notFound } from "./middleware/notFound";
 
 const app: Application = express();
 app.use(cors({
@@ -25,7 +27,9 @@ app.use("/api/auth", authRouter);
 app.use("/api/landlord", landlordRouter);
 app.use("/api/properties", propertiesRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/rentals", rentalRequestRouter);
 
 app.use(globalError);
+app.use(notFound);
 
 export default app;
