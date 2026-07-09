@@ -119,30 +119,7 @@ const updateRentalRequest = async (status: RequestStatus, rentalRequestId: strin
                 }
         });
 
-        if (status === "APPROVED") {
-            await tx.property.update({
-                where: { 
-                    id: rentalRequest.propertyId 
-                },
-                data: { 
-                    status: "RENTED" 
-                }
-            });
-
-            await tx.rentalRequest.updateMany({
-                where: {
-                    propertyId: rentalRequest.propertyId,
-                    id: { 
-                        not: rentalRequestId 
-                    },
-                    status: "PENDING"
-                },
-                data: { 
-                    status: "REJECTED" 
-                }
-            });
-
-        } else if (status === "REJECTED" || status ===  "PENDING") {
+       if (status === "REJECTED" || status ===  "PENDING") {
             await tx.property.update({
                 where: { 
                     id: rentalRequest.propertyId 

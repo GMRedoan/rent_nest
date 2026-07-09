@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { paymentService } from "./payment.service";
 import httpStatus from "http-status";
+import { paymentService } from "./payment.service";
 
 const createPayment = catchAsync(async(req:Request, res:Response) => {
-    const payment = await paymentService.createPayment();
+    const { rentalRequestId } = req.body;
+    const tenantId = req.user?.id;
+    const payment = await paymentService.createPayment(rentalRequestId, tenantId as string);
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
@@ -14,6 +16,19 @@ const createPayment = catchAsync(async(req:Request, res:Response) => {
     })
 })
 
+const confirmPayment = catchAsync(async(req:Request, res:Response) => {
+    const signature = req.headers["stripe-signature"] as string;
+    const rawBody = req.body;
+    const result = await paymentService.confirmPayment(rawBody, signature);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "payment confirmed successfully",
+        data: {result}
+    })
+})
+
 export const paymentController = {
-    createPayment
+    createPayment,
+    confirmPayment
 }
