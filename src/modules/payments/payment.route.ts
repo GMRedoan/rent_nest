@@ -7,4 +7,8 @@ const router = Router();
 
 router.post("/create", auth(Role.TENANT), paymentController.createPayment);
 
+router.get("/", auth(Role.TENANT),paymentController.paymentHistory);
+
+router.get("/:id", auth(Role.TENANT), paymentController.singlePaymentHistory);
+
 export const paymentsRouter = router;

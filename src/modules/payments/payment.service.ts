@@ -44,7 +44,7 @@ export const createPayment = async (rentalRequestId: string, tenantId: string) =
         line_items: [
             {
                 price_data: {
-                    currency: "usd",
+                    currency: "bdt",
                     product_data: {
                         name: rentalRequest.property.title
                     },
@@ -154,7 +154,35 @@ const confirmPayment = async (rawBody: Buffer, signature: string) => {
     return { received: true };
 };
 
+const paymentHistory = async (userId: string) => {
+    const payments = await prisma.payment.findMany({
+        where: { tenantId: userId },
+        orderBy: { createdAt: "desc" }
+    });
+    return payments
+}
+
+const singlePaymentHistory = async (paymentId: string, userId: string) => {
+    
+    const payment = await prisma.payment.findUnique({
+        where: { 
+            id: paymentId,
+            tenantId: userId
+         },
+        include: {
+            rentalRequest : {
+                include: {
+                    property: true
+                }
+            }
+         }
+    });
+    return payment
+}
+
 export const paymentService = {
     createPayment,
-    confirmPayment
+    confirmPayment,
+    paymentHistory,
+    singlePaymentHistory
 }
