@@ -77,11 +77,22 @@ const tenantReviews = catchAsync(async(req:Request, res:Response) => {
     })
 })
 
+const allCategories = catchAsync(async(req:Request, res:Response) => {
+    const categories = await landlordService.allCategories();
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "categories retrieved successfully",
+        data: {categories}
+    })
+})
+
 export const landlordController = {
     createProperties,
     updateProperties,
     deleteProperty,
     landlordRentalRequests,
     updateRentalRequest,
-    tenantReviews
+    tenantReviews,
+    allCategories
 }

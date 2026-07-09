@@ -1,6 +1,6 @@
 import { UserStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { ICreateCategory } from "./admin.interface";
+import { ICreateCategory, IUpdateCategory } from "./admin.interface";
 
 const allUsers = async () => {
     const users = await prisma.user.findMany();
@@ -48,10 +48,60 @@ const createCategory = async (payload: ICreateCategory) => {
     return category
 }
 
+const allCategories = async () => {
+    const categories = await prisma.category.findMany();
+    return categories
+}
+
+const updateCategory = async (id: string, payload: IUpdateCategory) => {
+    const isExist = await prisma.category.findUnique({
+        where: {
+            id
+        }
+    })
+    if (!isExist) {
+        throw new Error("category not found");
+    }
+    const isExistName = await prisma.category.findUnique({
+        where: {
+            name: payload.name
+        }
+    })
+    if (isExistName) {
+        throw new Error("category name already exist");
+    }
+    const UpdatedCategory = await prisma.category.update({
+        where: {
+            id
+        },
+        data: payload
+    })
+    return UpdatedCategory
+}
+
+const deleteCategory = async (id: string) => {
+    const isExist = await prisma.category.findUnique({
+        where: {
+            id
+        }
+    })
+    if (!isExist) {
+        throw new Error("category not found");
+    }
+    await prisma.category.delete({
+        where: {
+            id
+        }
+    })
+ }
+
 export const adminService = {
     allUsers,
     updateUserStatus,
     allProperties,
     allRentalRequests,
-    createCategory
+    createCategory,
+    allCategories,
+    updateCategory,
+    deleteCategory
 }
