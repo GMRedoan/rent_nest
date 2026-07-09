@@ -3,12 +3,28 @@ import { prisma } from "../../lib/prisma"
 import { IProperties, IUpdateProperties } from "./lanlordProperties.interface"
 
 const createProperties = async (payload: IProperties, landlordId: string) => {
+    let categoryId = payload.categoryId;
+    if (!categoryId) {
+        const category = await prisma.category.findFirst({
+            where: {
+                name: payload.propertyType 
+            }
+        });
+
+        if (!category) {
+            throw new Error(`no category found for property type ${payload.propertyType}`);
+        }
+
+        categoryId = category.id;
+    }
     const createdProperty = await prisma.property.create({
         data: {
              ...payload,
-             landlordId: landlordId
+            landlordId,
+            categoryId
         }
     })
+
 
     return createdProperty;
 }

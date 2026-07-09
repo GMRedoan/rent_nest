@@ -1,5 +1,6 @@
 import { UserStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
+import { ICreateCategory } from "./admin.interface";
 
 const allUsers = async () => {
     const users = await prisma.user.findMany();
@@ -40,9 +41,17 @@ const allRentalRequests = async () => {
     return requests
 }
 
+const createCategory = async (payload: ICreateCategory) => {
+    const category = await prisma.category.create({
+        data: payload
+    })
+    return category
+}
+
 export const adminService = {
     allUsers,
     updateUserStatus,
     allProperties,
-    allRentalRequests
+    allRentalRequests,
+    createCategory
 }

@@ -8,6 +8,7 @@ export interface IProperties {
     location: string
     images: string[]
     status?: PropertyStatus
+    categoryId?: string
 }
 
 export interface IUpdateProperties {
