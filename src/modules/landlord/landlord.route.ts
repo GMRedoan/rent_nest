@@ -15,4 +15,6 @@ router.get("/requests", auth(Role.LANDLORD), landlordController.landlordRentalRe
 
 router.patch("/requests/:id", auth(Role.LANDLORD), landlordController.updateRentalRequest);
 
+router.get("/reviews", auth(Role.LANDLORD), landlordController.tenantReviews);
+
 export const landlordRouter = router;

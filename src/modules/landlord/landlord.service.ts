@@ -93,15 +93,68 @@ const updateRentalRequest = async (status: RequestStatus, rentalRequestId: strin
     if(rentalRequest?.property?.landlordId !== landlordId) {
         throw new Error("you are not authorized to update this rental request");
     }
-     const updatedRentalRequest = await prisma.rentalRequest.update({
+    const updatedRentalRequest = await prisma.$transaction(async (tx) => {
+        const updated = await tx.rentalRequest.update({
+            where: { 
+                id: rentalRequestId 
+            },
+            data: {
+                 status 
+                }
+        });
+
+        if (status === "APPROVED") {
+            await tx.property.update({
+                where: { 
+                    id: rentalRequest.propertyId 
+                },
+                data: { 
+                    status: "RENTED" 
+                }
+            });
+
+            await tx.rentalRequest.updateMany({
+                where: {
+                    propertyId: rentalRequest.propertyId,
+                    id: { 
+                        not: rentalRequestId 
+                    },
+                    status: "PENDING"
+                },
+                data: { 
+                    status: "REJECTED" 
+                }
+            });
+
+        } else if (status === "REJECTED" || status ===  "PENDING") {
+            await tx.property.update({
+                where: { 
+                    id: rentalRequest.propertyId 
+                },
+                data: { 
+                    status: "AVAILABLE" 
+                }
+            });
+        }
+
+        return updated;
+    });
+
+    return updatedRentalRequest 
+}
+
+const tenantReviews = async (landlordId: string) => {
+    const reviews = await prisma.review.findMany({
         where: {
-            id: rentalRequestId
+             property:{
+                landlordId
+             }
         },
-        data: {
-            status
+        include: {
+            property: true
         }
     })
-    return updatedRentalRequest 
+    return reviews
 }
 
 export const landlordService ={
@@ -109,5 +162,6 @@ export const landlordService ={
     updateProperties,
     deleteProperty,
     landlordRentalRequests,
-    updateRentalRequest
+    updateRentalRequest,
+    tenantReviews
 }
