@@ -14,7 +14,7 @@ const singleProperty = async(propertyId: string) => {
     const property = await prisma.property.findUnique({
         where: {
             id: propertyId
-        }
+        } 
     })
     if (!property) {
         throw new Error("property not found");

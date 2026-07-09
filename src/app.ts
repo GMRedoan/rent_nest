@@ -6,9 +6,11 @@ import { globalError } from "./middleware/globalError";
 import { landlordRouter } from "./modules/landlord/landlord.route";
 import { propertiesRouter } from "./modules/properties/properties.route";
 import { adminRouter } from "./modules/admin/admin.route";
-import { rentalRequestRouter } from "./modules/rentalReqest/rentalReq.route";
+import { rentalRequestRouter } from "./modules/rentalRequest/rentalReq.route";
 import { notFound } from "./middleware/notFound";
 import { reviewsRouter } from "./modules/reviews/review.route";
+import { categoriesRouter } from "./modules/categories/categories.route";
+import { paymentsRouter } from "./modules/payments/payment.route";
 
 const app: Application = express();
 app.use(cors({
@@ -30,6 +32,8 @@ app.use("/api/properties", propertiesRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/rentals", rentalRequestRouter);
 app.use("/api/reviews", reviewsRouter);
+app.use("/api/categories", categoriesRouter);
+app.use("/api/payments", paymentsRouter);
 
 app.use(globalError);
 app.use(notFound);

@@ -48,11 +48,6 @@ const createCategory = async (payload: ICreateCategory) => {
     return category
 }
 
-const allCategories = async () => {
-    const categories = await prisma.category.findMany();
-    return categories
-}
-
 const updateCategory = async (id: string, payload: IUpdateCategory) => {
     const isExist = await prisma.category.findUnique({
         where: {
@@ -101,7 +96,6 @@ export const adminService = {
     allProperties,
     allRentalRequests,
     createCategory,
-    allCategories,
     updateCategory,
     deleteCategory
 }

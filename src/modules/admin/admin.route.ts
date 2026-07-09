@@ -15,8 +15,6 @@ router.get("/rentals", auth(Role.ADMIN), adminController.allRentalRequests);
 
 router.post("/categories", auth(Role.ADMIN), adminController.createCategory);
 
-router.get("/categories", auth(Role.ADMIN), adminController.allCategories);
-
 router.patch("/category/:id", auth(Role.ADMIN), adminController.updateCategory);
 
 router.delete("/category/:id", auth(Role.ADMIN), adminController.deleteCategory);

@@ -173,17 +173,11 @@ const tenantReviews = async (landlordId: string) => {
     return reviews
 }
 
-const allCategories = async () => {
-    const categories = await prisma.category.findMany();
-    return categories
-}
-
 export const landlordService ={
     createProperties,
     updateProperties,
     deleteProperty,
     landlordRentalRequests,
     updateRentalRequest,
-    tenantReviews,
-    allCategories
+    tenantReviews
 }
