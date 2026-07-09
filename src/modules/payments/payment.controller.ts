@@ -38,7 +38,7 @@ const paymentHistory = catchAsync(async(req:Request, res:Response) => {
         data: {payments}
     })
 });
-
+ 
 const singlePaymentHistory = catchAsync(async(req:Request, res:Response) => {
     const paymentId = req.params.id;
     const tenantId = req.user?.id;

@@ -11,7 +11,6 @@ import { notFound } from "./middleware/notFound";
 import { reviewsRouter } from "./modules/reviews/review.route";
 import { categoriesRouter } from "./modules/categories/categories.route";
 import { paymentsRouter } from "./modules/payments/payment.route";
-import { paymentController } from "./modules/payments/payment.controller";
 
 const app: Application = express();
 app.use(cors({
@@ -21,8 +20,7 @@ app.use(cors({
 
 app.post(
     "/api/payments/confirm",
-    express.raw({ type: "application/json" }),
-    paymentController.confirmPayment
+    express.raw({ type: "application/json" })
 );
 
 app.use(express.json());
