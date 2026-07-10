@@ -64,11 +64,25 @@ export const createPayment = async (rentalRequestId: string, tenantId: string) =
     const payment = await prisma.payment.create({
         data: {
             amount: rentalRequest.property.price,
-            status: "PENDING",
+            status: "PAID",
             stripeSessionId: session.id,
             rentalRequestId,
             tenantId
         }
+    });
+    
+    prisma.property.update({
+        where: { id: rentalRequest.propertyId },
+        data: { status: "RENTED" }
+    });
+
+    prisma.rentalRequest.updateMany({
+        where: {
+            propertyId: rentalRequest.propertyId,
+            id: { not: rentalRequest.id },
+            status: "PENDING"
+        },
+        data: { status: "REJECTED" }
     });
 
     return { 

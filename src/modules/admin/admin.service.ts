@@ -3,7 +3,11 @@ import { prisma } from "../../lib/prisma";
 import { ICreateCategory, IUpdateCategory } from "./admin.interface";
 
 const allUsers = async () => {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+        omit: {
+            password: true
+        }
+    });
     return users
 }
 

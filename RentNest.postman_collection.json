@@ -16,7 +16,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Redoan\",\n    \"email\": \"redu7@gmail.com\",\n    \"phone\": \"123456789\",\n    \"role\": \"LANDLORD\",\n    \"password\": \"12345\"\n}",
+              "raw": "{\n    \"name\": \"Redoan\",\n    \"email\": \"redoan5@gmail.com\",\n    \"phone\": \"123456789\",\n    \"role\": \"TENANT\",\n    \"password\": \"Redu123#\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -24,11 +24,13 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/auth/register",
+              "raw": "https://rent-nest-zeta.vercel.app/api/auth/register",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "auth",
@@ -45,7 +47,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"redu6@gmail.com\",\n    \"password\": \"12345\"\n}",
+              "raw": "{\n    \"email\": \"redoan3@gmail.com\",\n    \"password\": \"Redu123#\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -53,11 +55,13 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/auth/login",
+              "raw": "https://rent-nest-zeta.vercel.app/api/auth/login",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "auth",
@@ -73,11 +77,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/auth/me",
+              "raw": "https://rent-nest-zeta.vercel.app/api/auth/me",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "auth",
@@ -94,7 +100,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"redu1\",\n    \"phone\": \"0123948329\"\n}",
+              "raw": "{\n    \"name\": \"redoan\",\n    \"phone\": \"01764108600\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -102,14 +108,17 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/auth",
+              "raw": "https://rent-nest-zeta.vercel.app/api/auth/917a9ebd-2670-40ef-a52a-9395fbfd3867",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
-                "auth"
+                "auth",
+                "917a9ebd-2670-40ef-a52a-9395fbfd3867"
               ]
             }
           },
@@ -127,7 +136,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"title\": \"this is the eight property\",\n    \"description\": \"this is description\",\n    \"propertyType\": \"STUDIO\",\n    \"price\":  1499,\n    \"location\": \"Dhaka\",\n    \"images\": [\"www.image.com\", \"www.png.com\"]\n}",
+              "raw": "{\n    \"title\": \"this is the third property\",\n    \"description\": \"this is description\",\n    \"propertyType\": \"HOUSE\",\n    \"price\":  1499,\n    \"location\": \"Dhaka\",\n    \"images\": [\"www.image.com\", \"www.png.com\"]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -135,11 +144,13 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/landlord/properties",
+              "raw": "https://rent-nest-zeta.vercel.app/api/landlord/properties",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "landlord",
@@ -156,7 +167,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"title\": \"this is third property\",\n    \"price\":  1499,\n    \"location\": \"Barishal\",\n    \"status\": \"INACTIVE\"\n}",
+              "raw": "{\n    \"title\": \"this is third property\",\n    \"price\":  1499,\n    \"location\": \"Barishal\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -164,16 +175,18 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/landlord/properties/c61dcaf7-e622-4f77-8542-176ccf5705b1",
+              "raw": "https://rent-nest-zeta.vercel.app/api/landlord/properties/ae0de0b8-2061-49c6-ae6f-fd935e641ac3",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "landlord",
                 "properties",
-                "c61dcaf7-e622-4f77-8542-176ccf5705b1"
+                "ae0de0b8-2061-49c6-ae6f-fd935e641ac3"
               ]
             }
           },
@@ -185,16 +198,18 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/landlord/properties/e2e52551-63e8-4f09-a20c-1dc3c64b0dde",
+              "raw": "https://rent-nest-zeta.vercel.app/api/landlord/properties/ae0de0b8-2061-49c6-ae6f-fd935e641ac3",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "landlord",
                 "properties",
-                "e2e52551-63e8-4f09-a20c-1dc3c64b0dde"
+                "ae0de0b8-2061-49c6-ae6f-fd935e641ac3"
               ]
             }
           },
@@ -213,11 +228,13 @@
               "raw": "{\n    \"propertyId\": \"7a3cbdda-c93e-4db6-84f1-def1c437f5de\",\n    \"message\": \"i want the house\",\n    \"startDate\": \"2025-01-15\"\n}"
             },
             "url": {
-              "raw": "localhost:3000/api/landlord/requests",
+              "raw": "https://rent-nest-zeta.vercel.app/api/landlord/requests",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "landlord",
@@ -242,16 +259,18 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/landlord/requests/2e675c97-8ab3-46ec-9ee6-853307347254",
+              "raw": "https://rent-nest-zeta.vercel.app/api/landlord/requests/454a9895-05db-4990-82d5-175c3171e346",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "landlord",
                 "requests",
-                "2e675c97-8ab3-46ec-9ee6-853307347254"
+                "454a9895-05db-4990-82d5-175c3171e346"
               ]
             }
           },
@@ -270,11 +289,13 @@
               "raw": "{\n    \"propertyId\": \"7a3cbdda-c93e-4db6-84f1-def1c437f5de\",\n    \"message\": \"i want the house\",\n    \"startDate\": \"2025-01-15\"\n}"
             },
             "url": {
-              "raw": "localhost:3000/api/landlord/reviews",
+              "raw": "https://rent-nest-zeta.vercel.app/api/landlord/reviews",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "landlord",
@@ -295,11 +316,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/properties?limit=10&sortBy=createdAt&propertyType=STUDIO",
+              "raw": "https://rent-nest-zeta.vercel.app/api/properties?limit=10",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "properties"
@@ -311,12 +334,13 @@
                 },
                 {
                   "key": "sortBy",
-                  "value": "createdAt"
+                  "value": "createdAt",
+                  "disabled": true
                 },
                 {
                   "key": "propertyType",
                   "value": "STUDIO",
-                  "type": "text"
+                  "disabled": true
                 }
               ]
             }
@@ -329,15 +353,17 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/properties/7a3cbdda-c93e-4db6-84f1-def1c437f5de",
+              "raw": "https://rent-nest-zeta.vercel.app/api/properties/60a1b2b6-7ddc-49c4-8837-f32795c9a1fa",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "properties",
-                "7a3cbdda-c93e-4db6-84f1-def1c437f5de"
+                "60a1b2b6-7ddc-49c4-8837-f32795c9a1fa"
               ]
             }
           },
@@ -354,11 +380,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/admin/users",
+              "raw": "https://rent-nest-zeta.vercel.app/api/admin/users",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "admin",
@@ -375,7 +403,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"status\": \"ACTIVE\"\n}",
+              "raw": "{\n    \"status\": \"BANNED\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -383,16 +411,18 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/admin/users/aef2e5b5-1fc4-4ac8-aa65-77614fe6f1e9",
+              "raw": "https://rent-nest-zeta.vercel.app/api/admin/users/3ba15895-1581-4b5b-ab7d-218f6a9e889a",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "admin",
                 "users",
-                "aef2e5b5-1fc4-4ac8-aa65-77614fe6f1e9"
+                "3ba15895-1581-4b5b-ab7d-218f6a9e889a"
               ]
             }
           },
@@ -404,11 +434,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/admin/properties",
+              "raw": "https://rent-nest-zeta.vercel.app/api/admin/properties",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "admin",
@@ -431,11 +463,13 @@
               "raw": "{\n    \"propertyId\": \"7a3cbdda-c93e-4db6-84f1-def1c437f5de\",\n    \"message\": \"i want the house\",\n    \"startDate\": \"2025-01-15\"\n}"
             },
             "url": {
-              "raw": "localhost:3000/api/admin/rentals",
+              "raw": "https://rent-nest-zeta.vercel.app/api/admin/rentals",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "admin",
@@ -452,7 +486,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"STUDIO123\"\n}",
+              "raw": "{\n    \"name\": \"STUDIO12\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -460,11 +494,13 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/admin/categories",
+              "raw": "https://rent-nest-zeta.vercel.app/api/admin/categories",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "admin",
@@ -481,7 +517,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"APARTMENT\"\n}",
+              "raw": "{\n    \"name\": \"APARTMENT12\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -489,16 +525,18 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/admin/category/d755d93c-6319-4ad2-8d00-99f95826a735",
+              "raw": "https://rent-nest-zeta.vercel.app/api/admin/category/34aed977-32f5-44ae-ac8f-0dfac5f27b93",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "admin",
                 "category",
-                "d755d93c-6319-4ad2-8d00-99f95826a735"
+                "34aed977-32f5-44ae-ac8f-0dfac5f27b93"
               ]
             }
           },
@@ -514,16 +552,18 @@
               "raw": "{\n    \"name\": \"STUDIO\"\n}"
             },
             "url": {
-              "raw": "localhost:3000/api/admin/category/91c8f7be-f108-4766-bde2-4df92af43060",
+              "raw": "https://rent-nest-zeta.vercel.app/api/admin/category/34aed977-32f5-44ae-ac8f-0dfac5f27b93",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "admin",
                 "category",
-                "91c8f7be-f108-4766-bde2-4df92af43060"
+                "34aed977-32f5-44ae-ac8f-0dfac5f27b93"
               ]
             }
           },
@@ -541,7 +581,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"propertyId\": \"be876f62-0a81-45e7-abc5-f45ca6cc4af4\",\n    \"message\": \"i want to book this property\",\n    \"startDate\": \"2025-01-15T00:00:00.000Z\"\n}\n",
+              "raw": "{\n    \"propertyId\": \"f1d0121d-d02b-40f6-bdd8-02026b5ddef8\",\n    \"message\": \"i want to book this studio\",\n    \"startDate\": \"2025-01-15T00:00:00.000Z\"\n}\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -549,11 +589,13 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/rentals",
+              "raw": "https://rent-nest-zeta.vercel.app/api/rentals",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "rentals"
@@ -575,11 +617,13 @@
               "raw": "{\n    \"propertyId\": \"7a3cbdda-c93e-4db6-84f1-def1c437f5de\",\n    \"message\": \"i want the house\",\n    \"startDate\": \"2025-01-15\"\n}"
             },
             "url": {
-              "raw": "localhost:3000/api/rentals",
+              "raw": "https://rent-nest-zeta.vercel.app/api/rentals",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "rentals"
@@ -601,15 +645,17 @@
               "raw": "{\n    \"propertyId\": \"7a3cbdda-c93e-4db6-84f1-def1c437f5de\",\n    \"message\": \"i want the house\",\n    \"startDate\": \"2025-01-15\"\n}"
             },
             "url": {
-              "raw": "localhost:3000/api/rentals/031cecc8-0e80-4cec-b12a-9c9e24b1a697",
+              "raw": "https://rent-nest-zeta.vercel.app/api/rentals/516210bc-6dee-48ee-8575-b46d84bea7a8",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "rentals",
-                "031cecc8-0e80-4cec-b12a-9c9e24b1a697"
+                "516210bc-6dee-48ee-8575-b46d84bea7a8"
               ]
             }
           },
@@ -627,7 +673,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"propertyId\": \"7a3cbdda-c93e-4db6-84f1-def1c437f5de\",\n    \"comment\": \"ilove your restaurant\"\n}",
+              "raw": "{\n    \"propertyId\": \"f1d0121d-d02b-40f6-bdd8-02026b5ddef8\",\n    \"comment\": \"it was a very good experience for me\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -635,11 +681,13 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/reviews",
+              "raw": "https://rent-nest-zeta.vercel.app/api/reviews",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "reviews"
@@ -666,11 +714,13 @@
               "raw": "{\n    \"name\": \"STUDIO123\"\n}"
             },
             "url": {
-              "raw": "localhost:3000/api/categories",
+              "raw": "https://rent-nest-zeta.vercel.app/api/categories",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "categories"
@@ -691,7 +741,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"rentalRequestId\": \"2e675c97-8ab3-46ec-9ee6-853307347254\"\n}",
+              "raw": "{\n    \"rentalRequestId\": \"454a9895-05db-4990-82d5-175c3171e346\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -699,11 +749,13 @@
               }
             },
             "url": {
-              "raw": "localhost:3000/api/payments/create",
+              "raw": "https://rent-nest-zeta.vercel.app/api/payments/create",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "payments",
@@ -719,11 +771,13 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/payments/confirm",
+              "raw": "https://rent-nest-zeta.vercel.app/api/payments/confirm",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "payments",
@@ -739,11 +793,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/payments",
+              "raw": "https://rent-nest-zeta.vercel.app/api/payments",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "payments"
@@ -758,15 +814,17 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/payments/a2ddb1a4-f936-42a5-802d-51a7781df932",
+              "raw": "https://rent-nest-zeta.vercel.app/api/payments/1f646bf8-30d3-455d-a2a9-067b0b8169c1",
+              "protocol": "https",
               "host": [
-                "localhost"
+                "rent-nest-zeta",
+                "vercel",
+                "app"
               ],
-              "port": "3000",
               "path": [
                 "api",
                 "payments",
-                "a2ddb1a4-f936-42a5-802d-51a7781df932"
+                "1f646bf8-30d3-455d-a2a9-067b0b8169c1"
               ]
             }
           },
