@@ -11,7 +11,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsup",
     "start": "node dist/server.js",
-    "stripe:webhook": "stripe listen --forward-to localhost:3000/api/payments/confirm",
+    "stripe:webhook": "stripe listen --forward-to https://rent-nest-zeta.vercel.app/api/payments/confirm",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prisma:generate": "prisma generate"
   },
