@@ -29,6 +29,18 @@ const createProperties = async (payload: IProperties, landlordId: string) => {
     return createdProperty;
 }
 
+const getProperties = async (landlordId: string) => {
+    const properties = await prisma.property.findMany({
+        where: {
+            landlordId
+        },
+        include: {
+            category: true
+        }
+    })
+    return properties;
+}
+
 const updateProperties = async (payload: IUpdateProperties, propertiesId: string, landlordId: string) => {
     const property = await prisma.property.findUnique({
         where: {
@@ -152,6 +164,7 @@ const tenantReviews = async (landlordId: string) => {
 
 export const landlordService ={
     createProperties,
+    getProperties,
     updateProperties,
     deleteProperty,
     landlordRentalRequests,

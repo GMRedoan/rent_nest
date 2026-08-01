@@ -16,6 +16,17 @@ const createProperties = catchAsync(async(req:Request, res:Response) =>{
     })
 })
 
+const getProperties = catchAsync(async(req:Request, res:Response) =>{
+    const landlordId = req.user?.id
+    const properties = await landlordService.getProperties(landlordId as string);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "properties retrieved successfully",
+        data: {properties}
+    })
+})
+
 const updateProperties = catchAsync(async(req:Request, res:Response) =>{
     const landlordId = req.user?.id
     const propertiesId = req.params.id
@@ -79,6 +90,7 @@ const tenantReviews = catchAsync(async(req:Request, res:Response) => {
 
 export const landlordController = {
     createProperties,
+    getProperties,
     updateProperties,
     deleteProperty,
     landlordRentalRequests,
