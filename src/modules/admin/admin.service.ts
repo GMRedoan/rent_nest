@@ -20,6 +20,17 @@ const updateUserStatus = async (userId: string, status: UserStatus) => {
     if (!isExist) {
         throw new Error("user not found");
     }
+    const isAdmin = await prisma.user.findUnique({
+        where: {
+            id: userId
+        },
+        select: {
+            role: true
+        }
+    })
+    if (isAdmin?.role === "ADMIN") {
+        throw new Error("cannot update admin status");
+    }
 
     const user = await prisma.user.update({
         where: {

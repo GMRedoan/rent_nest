@@ -26,6 +26,18 @@ const createRentalRequest = async (payload: ICreateRentalRequest, tenantId: stri
         throw new Error("you already have a pending request for this property");
     }
 
+    const existingApproved = await prisma.rentalRequest.findFirst({
+        where: {
+            tenantId,
+            propertyId: payload.propertyId,
+            status: "APPROVED",
+        },
+    });
+
+    if (existingApproved) {
+        throw new Error("you already have an approved request for this property, you can make payment");
+    }
+
     const rentalRequest = await prisma.rentalRequest.create({
         data: {
             ...payload,

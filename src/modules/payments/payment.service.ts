@@ -53,13 +53,13 @@ export const createPayment = async (rentalRequestId: string, tenantId: string) =
                 quantity: 1
             }
         ],
-        success_url: `${config.app_url}/payments/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${config.app_url}/payments/cancel`,
+        success_url: `${config.app_url}/properties?success=true`,
+        cancel_url: `${config.app_url}/dashboard/tenant/myRequests?success=false`,
         metadata: {
             rentalRequestId,
             tenantId
         }
-    });
+    }); 
 
     const payment = await prisma.payment.create({
         data: {
