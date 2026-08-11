@@ -6,8 +6,8 @@ import httpStatus from "http-status";
 
 const createReview = catchAsync(async(req:Request, res:Response) => {
     const payload = req.body;
-    const tenantId = req.user?.id
-    const review = await reviewService.createReview(payload, tenantId);
+    const tenant = req.user
+    const review = await reviewService.createReview(payload, [tenant.id]);
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,

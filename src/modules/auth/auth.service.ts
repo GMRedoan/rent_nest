@@ -1,9 +1,12 @@
 import bcrypt from "bcryptjs"
 import { prisma } from "../../lib/prisma"
-import { ILoginUser, IPostUser, IUpdateUserPayload } from "./auth.interface"
+import { IGoogleLoginPayload, ILoginUser, IPostUser, IUpdateUserPayload } from "./auth.interface"
 import config from "../../config"
 import { jwtUtils } from "../../utils/jwt"
 import { SignOptions } from "jsonwebtoken"
+import { TokenPayload } from "google-auth-library"
+import { googleClient } from "../../lib/googleAuth"
+import { authProvider, Role } from "../../../generated/prisma/enums"
 
 const postUserIntoDB = async (payload: IPostUser) => {
     const { name, email, phone, password, role } = payload
@@ -49,7 +52,7 @@ const loginUser = async (payload: ILoginUser) => {
         throw new Error("user is banned, please contact support");
     }
 
-    const isPasswordMatched = await bcrypt.compare(password, user.password)
+    const isPasswordMatched = await bcrypt.compare(password, user.password as string);
     if (!isPasswordMatched) {
         throw new Error("password not matched");
     }
@@ -111,9 +114,78 @@ const updateUser = async(payload: IUpdateUserPayload, userId: string) => {
 
 }
 
+const googleLogin = async (payload: IGoogleLoginPayload) => {
+	let googleIdTokenPayload: TokenPayload | null | undefined = null;
+	try {
+		const ticket = await googleClient.verifyIdToken({
+			idToken: payload.idToken,
+			audience: config.google_client_id,
+		});
+
+		googleIdTokenPayload = ticket.getPayload();
+	} catch (error) {
+		console.log("Error verifying Google ID token:", error);
+		throw new Error("Invalid Google ID token");
+	}
+	if (!googleIdTokenPayload) {
+		throw new Error("Invalid Google ID token");
+	}
+	if (!googleIdTokenPayload.email) {
+		throw new Error("Invalid Google ID token");
+	}
+	if (!googleIdTokenPayload.name) {
+		throw new Error("Invalid Google ID token");
+	}
+	let user = await prisma.user.findFirst({
+		where: {
+			email: googleIdTokenPayload.email,
+			role: Role.TENANT,
+			googleId: googleIdTokenPayload.sub,
+		},
+	});
+
+	if (!user) {
+		user = await prisma.user.create({
+			data: {
+				email: googleIdTokenPayload.email,
+				name: googleIdTokenPayload.name,
+                profilePhoto: googleIdTokenPayload.picture,
+				role: Role.TENANT,
+				googleId: googleIdTokenPayload.sub,
+				authProvider: authProvider.GOOGLE,
+ 			},
+		});
+	}
+
+	const jwtPayload = {
+		userId: user.id,
+		name: user.name,
+		email: user.email,
+		role: user.role,
+	};
+
+	const accessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_access_secret,
+		config.jwt_access_expires_in as SignOptions,
+	);
+
+	const refreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_refresh_secret,
+		config.jwt_refresh_expires_in as SignOptions,
+	);
+
+	return {
+		accessToken,
+		refreshToken,
+	};
+};
+
 export const authService = {
     postUserIntoDB,
     loginUser,
     getMyProfile,
-    updateUser
+    updateUser,
+    googleLogin
 }

@@ -13,8 +13,12 @@ import { categoriesRouter } from "./modules/categories/categories.route";
 import { paymentsRouter } from "./modules/payments/payment.route";
 
 const app: Application = express();
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://rent-nest-frontend-navy.vercel.app"
+];
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true
 }))
 

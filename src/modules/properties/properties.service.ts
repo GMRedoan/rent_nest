@@ -76,7 +76,17 @@ const singleProperty = async(propertyId: string) => {
         },
         include: {
             rentalRequests: true,
-            reviews: true
+            reviews: {
+                include: {
+                    tenant: {
+                        select: {
+                            name: true,
+                            email: true,
+                            profilePhoto: true
+                        }
+                    }
+                }
+            }
         }
     });
     return result

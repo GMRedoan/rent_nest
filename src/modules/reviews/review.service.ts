@@ -1,7 +1,13 @@
 import { prisma } from "../../lib/prisma";
 import { ICreateReview } from "./review.interface";
 
-const createReview = async (payload: ICreateReview, tenantId: string) => {
+const createReview = async (payload: ICreateReview, tenant: string[]) => {
+    const tenantId = tenant[0];
+
+    if (!tenantId) {
+        throw new Error("invalid tenant information");
+    }
+
     const property = await prisma.property.findUnique({
         where: { id: payload.propertyId },
     });
