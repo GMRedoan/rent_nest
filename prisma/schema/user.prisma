@@ -2,7 +2,7 @@ model User {
     id           String       @id @default(uuid())
     name         String       @db.VarChar(255)
     email        String       @unique
-    phone        String?       @db.Text
+    phone        String?      @db.Text
     password     String?
     googleId     String?      @unique
     authProvider authProvider @default(CREDENTIAL)

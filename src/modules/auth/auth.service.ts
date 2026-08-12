@@ -136,11 +136,11 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 	if (!googleIdTokenPayload.name) {
 		throw new Error("Invalid Google ID token");
 	}
-	let user = await prisma.user.findFirst({
+	let user = await prisma.user.findUnique({
 		where: {
 			email: googleIdTokenPayload.email,
-			role: Role.TENANT,
-			googleId: googleIdTokenPayload.sub,
+			// role: Role.TENANT,
+			// googleId: googleIdTokenPayload.sub,
 		},
 	});
 
@@ -155,12 +155,21 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 				authProvider: authProvider.GOOGLE,
  			},
 		});
-	}
+	}else if (!user.googleId) {
+    user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+            googleId: googleIdTokenPayload.sub,
+            profilePhoto: user.profilePhoto ?? googleIdTokenPayload.picture,
+        },
+    });
+}
 
 	const jwtPayload = {
-		userId: user.id,
+		id: user.id,
 		name: user.name,
 		email: user.email,
+        phone: user.phone ?? null,
 		role: user.role,
 	};
 
