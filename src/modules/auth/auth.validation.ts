@@ -9,7 +9,7 @@ const createUserValidationSchema = z.object({
         phone: z.string().regex(/^[0-9+\-\s]{7,15}$/, 'Invalid phone number').optional(),
         password: z
             .string()
-            .min(6, 'Password must be at least 8 characters')
+            .min(6, 'Password must be at least 6 characters')
             .regex(
                 /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).*$/,
                 'Password must contain uppercase, lowercase, number, and special character'
@@ -18,6 +18,21 @@ const createUserValidationSchema = z.object({
     }),
 });
 
+const resetPasswordSchema = z.object({
+    body: z.object({
+        email: z.string().email('Invalid email format'),
+        newPassword: z
+            .string()
+            .min(6, 'Password must be at least 6 characters')
+            .regex(
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).*$/,
+                'Password must contain uppercase, lowercase, number, and special character'
+            ),
+        otp: z.string().length(6, 'OTP must be 6 digits'),
+    }),
+});
+
 export const UserValidation = {
     createUserValidationSchema,
+    resetPasswordSchema
 };

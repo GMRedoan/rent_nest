@@ -1,12 +1,14 @@
 import bcrypt from "bcryptjs"
 import { prisma } from "../../lib/prisma"
-import { IGoogleLoginPayload, ILoginUser, IPostUser, IUpdateUserPayload } from "./auth.interface"
+import { IForgotPasswordPayload, IGoogleLoginPayload, ILoginUser, IPostUser, IResetPasswordPayload, IUpdateUserPayload } from "./auth.interface"
 import config from "../../config"
 import { jwtUtils } from "../../utils/jwt"
 import { SignOptions } from "jsonwebtoken"
 import { TokenPayload } from "google-auth-library"
 import { googleClient } from "../../lib/googleAuth"
 import { authProvider, Role } from "../../../generated/prisma/enums"
+import crypto from "crypto";
+import { redisClient } from "../../lib/redis"
 
 const postUserIntoDB = async (payload: IPostUser) => {
     const { name, email, phone, password, role } = payload
@@ -50,6 +52,9 @@ const loginUser = async (payload: ILoginUser) => {
 
     if(user.status === "BANNED"){
         throw new Error("user is banned, please contact support");
+    }
+    if(user.emailVerified === false){
+        throw new Error("user is not verified, please verify your email");
     }
 
     const isPasswordMatched = await bcrypt.compare(password, user.password as string);
@@ -139,8 +144,6 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 	let user = await prisma.user.findUnique({
 		where: {
 			email: googleIdTokenPayload.email,
-			// role: Role.TENANT,
-			// googleId: googleIdTokenPayload.sub,
 		},
 	});
 
@@ -153,6 +156,7 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 				role: Role.TENANT,
 				googleId: googleIdTokenPayload.sub,
 				authProvider: authProvider.GOOGLE,
+                emailVerified: true
  			},
 		});
 	}else if (!user.googleId) {
@@ -171,6 +175,7 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 		email: user.email,
         phone: user.phone ?? null,
 		role: user.role,
+        emailVerified: user.emailVerified
 	};
 
 	const accessToken = jwtUtils.createToken(
@@ -191,10 +196,87 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 	};
 };
 
+const forgotPassword = async (payload: IForgotPasswordPayload) => {
+    const {email} = payload;
+    const isUserExists = await prisma.user.findUnique({
+        where: {
+            email
+        }
+    })
+    if(!isUserExists) {
+        throw new Error("user not found");
+    }
+    if(!isUserExists.emailVerified){
+        throw new Error("user email is not verified");
+    }
+    if(isUserExists.status === "BANNED"){
+        throw new Error("user is banned, please contact support");
+    }
+    if(isUserExists.googleId && isUserExists.authProvider === "GOOGLE"){ 
+        throw new Error("user is registered with google, please use google login");
+    };
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const key = `forgot-password-otp:${isUserExists.email}`;
+
+    await redisClient.set(key, otp, {
+        expiration: {
+            type: "EX",
+            value: 2 * 60
+        }
+    });
+
+}
+
+const resetPassword = async (payload: IResetPasswordPayload) => {
+    const {email, otp, newPassword} = payload;
+    const isUserExists = await prisma.user.findUnique({
+        where: {
+            email
+        }
+    })
+    if(!isUserExists) {
+        throw new Error("user not found");
+    }
+    if(!isUserExists.emailVerified){
+        throw new Error("user email is not verified");
+    }
+    if(isUserExists.status === "BANNED"){
+        throw new Error("user is banned, please contact support");
+    }
+    if(isUserExists.googleId && isUserExists.authProvider === "GOOGLE"){ 
+        throw new Error("user is registered with google, please use google login");
+    };
+
+    const key = `forgot-password-otp:${isUserExists.email}`;
+    const redisOtp = await redisClient.get(key);
+
+    if(!redisOtp){
+        throw new Error("otp not found");
+    }
+    if(redisOtp !== otp){
+        throw new Error("invalid otp");
+    }
+
+    const newHashedPassword = await bcrypt.hash(newPassword, Number(config.bycrypt_salt_rounds));
+    await prisma.user.update({
+        where: {
+            email : isUserExists.email
+        },
+        data: {
+            password: newHashedPassword
+        }
+    })
+
+    await redisClient.del([key]);
+
+}
+
 export const authService = {
     postUserIntoDB,
     loginUser,
     getMyProfile,
     updateUser,
-    googleLogin
+    googleLogin,
+    forgotPassword,
+    resetPassword
 }

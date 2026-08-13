@@ -1,5 +1,5 @@
 import cookieParser from "cookie-parser";
-import express, { Application, Request, Response } from "express";
+import express, { Application, NextFunction, Request, Response } from "express";
 import cors from "cors";
 import { authRouter } from "./modules/auth/auth.route";
 import { globalError } from "./middleware/globalError";
@@ -11,6 +11,9 @@ import { notFound } from "./middleware/notFound";
 import { reviewsRouter } from "./modules/reviews/review.route";
 import { categoriesRouter } from "./modules/categories/categories.route";
 import { paymentsRouter } from "./modules/payments/payment.route";
+import { redisClient } from "./lib/redis";
+import { sendResponse } from "./utils/sendResponse";
+import crypto from "crypto";
 
 const app: Application = express();
 const allowedOrigins = [
@@ -43,6 +46,28 @@ app.use("/api/rentals", rentalRequestRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/payments", paymentsRouter);
+
+// test
+app.get("/test", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const otp = crypto.randomInt(100000, 1000000)
+        // await redisClient.set("forgot-password-otp: redoan@gmail.com", "123456", {
+        //     expiration:{
+        //         type: "EX",
+        //         value: 60
+        //     }
+        // });
+        sendResponse(res, {
+            success: true,
+            statusCode: 200,
+            message: "user logged in successfully",
+            data: otp
+        })
+        next();
+    } catch (error) {
+        
+    }
+});
 
 app.use(globalError);
 app.use(notFound);
