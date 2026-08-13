@@ -9,6 +9,9 @@ import { googleClient } from "../../lib/googleAuth"
 import { authProvider, Role } from "../../../generated/prisma/enums"
 import crypto from "crypto";
 import { redisClient } from "../../lib/redis"
+import { transporter } from "../../lib/nodeMailer"
+import ejs from "ejs";
+import path from "path"
 
 const postUserIntoDB = async (payload: IPostUser) => {
     const { name, email, phone, password, role } = payload
@@ -224,7 +227,15 @@ const forgotPassword = async (payload: IForgotPasswordPayload) => {
             value: 2 * 60
         }
     });
+    const templatePath = path.join(process.cwd(), "src/template/forgot-password.ejs");
+    const html = await ejs.renderFile(templatePath, {otp})
 
+    await transporter.sendMail({
+        from: config.smtp_user,
+        to: email,
+        subject: "Forgot Password Otp",
+        html
+    });
 }
 
 const resetPassword = async (payload: IResetPasswordPayload) => {
@@ -268,6 +279,16 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
     })
 
     await redisClient.del([key]);
+
+        const templatePath = path.join(process.cwd(), "src/template/reset-passwordSuccess.ejs");
+        const html = await ejs.renderFile(templatePath)
+
+        await transporter.sendMail({
+            from: config.smtp_user,
+            to: email,
+            subject: "Password Reset Successfully",
+            html,
+        });
 
 }
 
