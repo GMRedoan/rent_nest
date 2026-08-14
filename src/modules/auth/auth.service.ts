@@ -26,20 +26,55 @@ const postUserIntoDB = async (payload: IPostUser) => {
 
     const hashedPassword = await bcrypt.hash(password, Number(config.bycrypt_salt_rounds))
 
-    const createdUser = await prisma.user.create({
-        data:{
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const otpKey = `user-registration-otp:${email}`;
+        await redisClient.set(otpKey, otp, {
+        expiration: {
+            type: "EX",
+            value: 2 * 60
+        }
+    });
+
+    const userRegistrationKey = `user-registration:${email}`;
+    const redisUserDataPayload = {
             name,
             email,
             phone,
             role: role ?? 'TENANT',
             password: hashedPassword,
-         },
-         omit: {
-            password: true
-         }
-    })
+    }
+    await redisClient.set(userRegistrationKey, JSON.stringify(redisUserDataPayload), {
+        expiration: {
+            type: "EX",
+            value: 5 * 60
+        }
+    });
+    const templatePath = path.join(process.cwd(), "src/template/registration-otp.ejs");
+    const html = await ejs.renderFile(templatePath, {otp})
 
-    return createdUser
+    await transporter.sendMail({
+        from: config.smtp_user,
+        to: email,
+        subject: "Email Verification Otp",
+        html
+    });
+
+    // create user in db
+
+    // const createdUser = await prisma.user.create({
+    //     data:{
+    //         name,
+    //         email,
+    //         phone,
+    //         role: role ?? 'TENANT',
+    //         password: hashedPassword,
+    //      },
+    //      omit: {
+    //         password: true
+    //      }
+    // })
+
+    // return createdUser
 }
 
 const loginUser = async (payload: ILoginUser) => {

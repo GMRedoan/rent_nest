@@ -6,12 +6,12 @@ import httpStatus from "http-status";
 
 const postUser = catchAsync(async (req: Request, res: Response) => {
     const payload = req.body;
-    const user = await authService.postUserIntoDB(payload);
+    await authService.postUserIntoDB(payload);
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
-        message: "user created successfully",
-        data: {user}
+        message: "Verification code has been sent to your email",
+        data: null
     })
 });
 
