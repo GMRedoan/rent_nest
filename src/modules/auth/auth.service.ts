@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs"
 import { prisma } from "../../lib/prisma"
-import { IForgotPasswordPayload, IGoogleLoginPayload, ILoginUser, IPostUser, IResetPasswordPayload, IUpdateUserPayload } from "./auth.interface"
+import { IForgotPasswordPayload, IGoogleLoginPayload, ILoginUser, IPostUser, IResetPasswordPayload, IUpdateUserPayload, IVerifyEmail } from "./auth.interface"
 import config from "../../config"
 import { jwtUtils } from "../../utils/jwt"
 import { SignOptions } from "jsonwebtoken"
@@ -27,11 +27,11 @@ const postUserIntoDB = async (payload: IPostUser) => {
     const hashedPassword = await bcrypt.hash(password, Number(config.bycrypt_salt_rounds))
 
     const otp = crypto.randomInt(100000, 1000000).toString();
-    const otpKey = `user-registration-otp:${email}`;
+    const otpKey = `user-verification-otp:${email}`;
         await redisClient.set(otpKey, otp, {
         expiration: {
             type: "EX",
-            value: 2 * 60
+            value: 5 * 60
         }
     });
 
@@ -59,22 +59,69 @@ const postUserIntoDB = async (payload: IPostUser) => {
         html
     });
 
-    // create user in db
+}
 
-    // const createdUser = await prisma.user.create({
-    //     data:{
-    //         name,
-    //         email,
-    //         phone,
-    //         role: role ?? 'TENANT',
-    //         password: hashedPassword,
-    //      },
-    //      omit: {
-    //         password: true
-    //      }
-    // })
+const verifyEmail = async (payload: IVerifyEmail) =>{
+    const email = payload.email
+    const otp = payload.otp;
+    const isExist = await prisma.user.findUnique({
+        where: {email}
+    })
+    if (isExist?.emailVerified === true) {
+        throw new Error("user is already verified");
+    }
+    if(isExist?.status === "BANNED"){
+        throw new Error("user is banned, please contact support");
+    }
+    const otpKey = `user-verification-otp:${email}`;
+    const redisOtp = await redisClient.get(otpKey);
+    if(!redisOtp){
+        throw new Error("otp not found");
+    }
+    if(redisOtp !== otp){
+        throw new Error("invalid otp");
+    }
+    await redisClient.del(otpKey);
 
-    // return createdUser
+    const userRegistrationKey = `user-registration:${email}`;
+    const redisUserData = await redisClient.get(userRegistrationKey);
+    if(!redisUserData){
+        throw new Error("user data not found");
+    }
+
+    await redisClient.del(userRegistrationKey);
+    const userPayload : IPostUser = JSON.parse(redisUserData);
+        const createdUser = await prisma.user.create({
+        data:{
+            name: userPayload.name,
+            email: userPayload.email,
+            phone: userPayload.phone,
+            role: userPayload.role,
+            password: userPayload.password,
+            emailVerified: true
+         },
+         omit: {
+            password: true
+         }
+    })
+
+    const jwtPayload = {
+        id: createdUser.id,
+        name: createdUser.name,
+        phone: createdUser.phone,
+        email: createdUser.email,
+        role: createdUser.role,
+        emailVerified: createdUser.emailVerified
+    }
+    const accessToken = jwtUtils.createToken(jwtPayload, config.jwt_access_secret, config.jwt_access_expires_in as SignOptions);
+
+    const refreshToken = jwtUtils.createToken(jwtPayload, config.jwt_refresh_secret, config.jwt_refresh_expires_in as SignOptions);
+
+    return {
+        accessToken,
+        refreshToken
+    }
+
 }
 
 const loginUser = async (payload: ILoginUser) => {
@@ -105,7 +152,8 @@ const loginUser = async (payload: ILoginUser) => {
         name: user.name,
         phone: user.phone,
         email: user.email,
-        role: user.role
+        role: user.role,
+        emailVerified: user.emailVerified
     }
     const accessToken = jwtUtils.createToken(jwtPayload, config.jwt_access_secret, config.jwt_access_expires_in as SignOptions);
 
@@ -329,6 +377,7 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
 
 export const authService = {
     postUserIntoDB,
+    verifyEmail,
     loginUser,
     getMyProfile,
     updateUser,

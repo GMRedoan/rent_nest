@@ -1,9 +1,14 @@
-export interface IPostUser  {
+export interface IPostUser {
     name: string
     email: string
     phone: string
     password: string
     role?: 'TENANT' | 'LANDLORD';
+}
+
+export interface IVerifyEmail {
+     email: string
+     otp: string
 }
 
 export interface IUpdateUserPayload{
