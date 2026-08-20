@@ -9,6 +9,10 @@ router.post("/create", auth(Role.TENANT), paymentController.createPayment);
 
 router.post("/confirm", paymentController.confirmPayment);
 
+router.post("/bkash", paymentController.bkashPayment);
+
+router.get("/callback", paymentController.bkashPaymentCallback);
+
 router.get("/", auth(Role.TENANT),paymentController.paymentHistory);
 
 router.get("/:id", auth(Role.TENANT), paymentController.singlePaymentHistory);

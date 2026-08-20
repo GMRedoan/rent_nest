@@ -14,6 +14,7 @@ import { paymentsRouter } from "./modules/payments/payment.route";
 import { redisClient } from "./lib/redis";
 import { sendResponse } from "./utils/sendResponse";
 import crypto from "crypto";
+import { getBkashIdToken } from "./lib/bkash";
 
 const app: Application = express();
 const allowedOrigins = [
@@ -50,22 +51,17 @@ app.use("/api/payments", paymentsRouter);
 // test
 app.get("/test", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const otp = crypto.randomInt(100000, 1000000)
-        // await redisClient.set("forgot-password-otp: redoan@gmail.com", "123456", {
-        //     expiration:{
-        //         type: "EX",
-        //         value: 60
-        //     }
-        // });
+        const grantIdToken = await getBkashIdToken();
+        console.log(grantIdToken);
+
         sendResponse(res, {
             success: true,
             statusCode: 200,
-            message: "user logged in successfully",
-            data: otp
+            message: "test",
+            data: grantIdToken
         })
-        next();
     } catch (error) {
-        
+         next(error);
     }
 });
 

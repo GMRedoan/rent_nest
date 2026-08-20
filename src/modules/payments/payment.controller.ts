@@ -28,6 +28,28 @@ const confirmPayment = catchAsync(async(req:Request, res:Response) => {
     })
 })
 
+const bkashPayment = catchAsync(async(req:Request, res:Response) => {
+    const result = await paymentService.bkashPayment();
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "payment created successfully",
+        data: result
+    })
+})
+
+const bkashPaymentCallback = catchAsync(async (req: Request, res: Response) => {
+    console.log("req.query", req.query);
+  const result = await paymentService.bkashPaymentCallback();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "payment created successfully",
+    data: result,
+  });
+});
+
+
 const paymentHistory = catchAsync(async(req:Request, res:Response) => {
     const tenantId = req.user?.id;
     const payments = await paymentService.paymentHistory(tenantId as string);
@@ -54,6 +76,8 @@ const singlePaymentHistory = catchAsync(async(req:Request, res:Response) => {
 export const paymentController = {
     createPayment,
     confirmPayment,
+    bkashPayment,
+    bkashPaymentCallback,
     paymentHistory,
     singlePaymentHistory
 }
