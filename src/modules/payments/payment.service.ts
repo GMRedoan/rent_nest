@@ -159,43 +159,92 @@ const confirmPayment = async (rawBody: Buffer, signature: string) => {
 };
 
 const bkashPayment = async () => {
-    const bkashIdToken = await getBkashIdToken();
-    if(!bkashIdToken) {
-        throw new Error("bkash id token not found");
-    }
-    const bkashCreatePaymentResponse = await fetch(
-      `${config.bkash_base_url}/tokenized/checkout/create`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: bkashIdToken,
-          "X-App-Key": config.bkash_app_key,
-        },
-        body: JSON.stringify({
-          agreementID: "TokenizedMerchant01L3IKB6H1565072174986",
-          mode: "0011",
-          payerReference: "01723888888",
-          callbackURL: `${config.app_url}api/payments/callback`,
-          merchantAssociationInfo: "MI05MID54RF09123456One",
-          amount: "1200",
-          currency: "BDT",
-          intent: "sale",
-          merchantInvoiceNumber: "Inv0124",
-        }),
+  const bkashIdToken = await getBkashIdToken();
+  if (!bkashIdToken) {
+    throw new Error("bkash id token not found");
+  }
+  const bkashCreatePaymentResponse = await fetch(
+    `${config.bkash_base_url}/tokenized/checkout/create`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: bkashIdToken,
+        "X-App-Key": config.bkash_app_key,
       },
-    );
-    const bkashCreatePaymentResult = await bkashCreatePaymentResponse.json();
+      body: JSON.stringify({
+        agreementID: "TokenizedMerchant01L3IKB6H1565072174986",
+        mode: "0011",
+        payerReference: "01723888888",
+        callbackURL: `${config.app_url}/payments/callback`,
+        merchantAssociationInfo: "MI05MID54RF09123456One",
+        amount: "1200",
+        currency: "BDT",
+        intent: "sale",
+        merchantInvoiceNumber: "Inv0124",
+      }),
+    },
+  );
+  const bkashCreatePaymentResult = await bkashCreatePaymentResponse.json();
 
-    return bkashCreatePaymentResult;
+  return bkashCreatePaymentResult;
 };
 
-const bkashPaymentCallback = async ()=> {
+const bkashPaymentCallback = async (query: Record<string, any>) => {
+  const paymentId = query.paymentID;
+  if (!paymentId) {
+    throw new Error("payment id not found");
+  }
+  const status = query.status;
+  if (!status) {
+    throw new Error("status not found");
+  }
+  const bkashIdToken = await getBkashIdToken();
+  if (!bkashIdToken) {
+    throw new Error("bkash id token not found");
+  }
+  const executePaymentResponse = await fetch(
+    `${config.bkash_base_url}/tokenized/checkout/execute`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: bkashIdToken,
+        "X-App-Key": config.bkash_app_key,
+      },
+      body: JSON.stringify({
+        paymentID: paymentId,
+        status: status,
+      }),
+    },
+  );
+  const executePaymentResult = await executePaymentResponse.json();
+  if (status === "success") {
     return {
-        success: true
-    }
-}
+      executePaymentResult,
+      redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=success`,
+    };
+  }
+  if (status === "failure") {
+    return {
+      executePaymentResult,
+      redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=failure`,
+    };
+  }
+  if (status === "cancel") {
+    return {
+      executePaymentResult,
+      redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=cancel`,
+    };
+  }
+
+  return {
+    executePaymentResult,
+    redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory`,
+  };
+};
 
 const paymentHistory = async (userId: string) => {
   const payments = await prisma.payment.findMany({

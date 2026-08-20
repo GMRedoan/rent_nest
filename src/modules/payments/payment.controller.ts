@@ -40,13 +40,11 @@ const bkashPayment = catchAsync(async(req:Request, res:Response) => {
 
 const bkashPaymentCallback = catchAsync(async (req: Request, res: Response) => {
     console.log("req.query", req.query);
-  const result = await paymentService.bkashPaymentCallback();
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "payment created successfully",
-    data: result,
-  });
+  const {executePaymentResult, redirectUrl} = await paymentService.bkashPaymentCallback(req.query);
+  console.log("executePaymentResult", executePaymentResult);
+
+  res.redirect(redirectUrl);
+
 });
 
 
