@@ -11,9 +11,7 @@ import { notFound } from "./middleware/notFound";
 import { reviewsRouter } from "./modules/reviews/review.route";
 import { categoriesRouter } from "./modules/categories/categories.route";
 import { paymentsRouter } from "./modules/payments/payment.route";
-import { redisClient } from "./lib/redis";
 import { sendResponse } from "./utils/sendResponse";
-import crypto from "crypto";
 import { getBkashIdToken } from "./lib/bkash";
 
 const app: Application = express();

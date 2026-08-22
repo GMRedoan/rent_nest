@@ -39,14 +39,12 @@ const bkashPayment = catchAsync(async(req:Request, res:Response) => {
 })
 
 const bkashPaymentCallback = catchAsync(async (req: Request, res: Response) => {
-    console.log("req.query", req.query);
   const {executePaymentResult, redirectUrl} = await paymentService.bkashPaymentCallback(req.query);
   console.log("executePaymentResult", executePaymentResult);
 
   res.redirect(redirectUrl);
 
 });
-
 
 const paymentHistory = catchAsync(async(req:Request, res:Response) => {
     const tenantId = req.user?.id;

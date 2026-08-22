@@ -33,7 +33,13 @@ enum PaymentStatus {
   PENDING
   PAID
   FAILED
+  CANCELLED
   REFUNDED
+}
+
+enum paymentMethod {
+  Stripe
+  Bkash
 }
 
 enum authProvider {
