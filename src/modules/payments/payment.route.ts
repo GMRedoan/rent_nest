@@ -9,7 +9,7 @@ router.post("/create", auth(Role.TENANT), paymentController.createPayment);
 
 router.post("/confirm", paymentController.confirmPayment);
 
-router.post("/bkash", paymentController.bkashPayment);
+router.post("/bkash", auth(Role.TENANT), paymentController.bkashPayment);
 
 router.get("/callback", paymentController.bkashPaymentCallback);
 

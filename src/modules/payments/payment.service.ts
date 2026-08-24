@@ -3,6 +3,7 @@ import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
 import { getBkashIdToken } from "../../lib/bkash";
+import { PaymentStatus, PropertyStatus } from "../../../generated/prisma/enums";
 
 export const createPayment = async (
   rentalRequestId: string,
@@ -158,92 +159,172 @@ const confirmPayment = async (rawBody: Buffer, signature: string) => {
   return { received: true };
 };
 
-const bkashPayment = async () => {
-  const bkashIdToken = await getBkashIdToken();
-  if (!bkashIdToken) {
-    throw new Error("bkash id token not found");
-  }
-  const bkashCreatePaymentResponse = await fetch(
-    `${config.bkash_base_url}/tokenized/checkout/create`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: bkashIdToken,
-        "X-App-Key": config.bkash_app_key,
+const bkashPayment = async (rentalRequestId: string, tenantId: string) => {
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    const rentalRequest = await prisma.rentalRequest.findUnique({
+      where: {
+        id: rentalRequestId,
       },
-      body: JSON.stringify({
-        agreementID: "TokenizedMerchant01L3IKB6H1565072174986",
-        mode: "0011",
-        payerReference: "01723888888",
-        callbackURL: `${config.app_url}/payments/callback`,
-        merchantAssociationInfo: "MI05MID54RF09123456One",
-        amount: "1200",
-        currency: "BDT",
-        intent: "sale",
-        merchantInvoiceNumber: "Inv0124",
-      }),
-    },
-  );
-  const bkashCreatePaymentResult = await bkashCreatePaymentResponse.json();
+      include: {
+        property: true,
+        tenant: true,
+      },
+    });
 
-  return bkashCreatePaymentResult;
+    if (!rentalRequest) {
+      throw new Error("rental request not found");
+    }
+
+    if (rentalRequest.tenantId !== tenantId) {
+      throw new Error("you are not authorized to pay for this request");
+    }
+
+    if (rentalRequest.status !== "APPROVED") {
+      throw new Error("payment can only be made for approved rental requests");
+    }
+
+    const existingPayment = await prisma.payment.findFirst({
+      where: {
+        rentalRequestId,
+        status: {
+          in: ["PENDING", "PAID"],
+        },
+      },
+    });
+
+    if (existingPayment?.status === "PAID") {
+      throw new Error("this rental request has already been paid for");
+    }
+
+    const bkashIdToken = await getBkashIdToken();
+    if (!bkashIdToken) {
+      throw new Error("bkash id token not found");
+    }
+    const bkashCreatePaymentResponse = await fetch(
+      `${config.bkash_base_url}/tokenized/checkout/create`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: bkashIdToken,
+          "X-App-Key": config.bkash_app_key,
+        },
+        body: JSON.stringify({
+          mode: "0011",
+          payerReference: rentalRequest.tenant.email,
+          callbackURL: `${config.app_url}/payments/callback`,
+          amount: rentalRequest.property.price,
+          currency: "BDT",
+          intent: "sale",
+          merchantInvoiceNumber: rentalRequest.property.id,
+        }),
+      },
+    );
+    const bkashCreatePaymentResult = await bkashCreatePaymentResponse.json();
+    // create payment model
+    await tx.payment.create({
+      data: {
+        tenantId,
+        merchantInvoiceNumber: bkashCreatePaymentResult.merchantInvoiceNumber,
+        rentalRequestId,
+        amount: rentalRequest.property.price,
+        paymentGateway: "Bkash",
+        bkashPaymentId: bkashCreatePaymentResult.paymentID,
+      },
+    });
+
+    return {
+      paymentUrl : bkashCreatePaymentResult.bkashURL
+    }
+  });
+
+  return transactionResult;
 };
 
 const bkashPaymentCallback = async (query: Record<string, any>) => {
-  const paymentId = query.paymentID;
-  if (!paymentId) {
-    throw new Error("payment id not found");
-  }
-  const status = query.status;
-  if (!status) {
-    throw new Error("status not found");
-  }
-  const bkashIdToken = await getBkashIdToken();
-  if (!bkashIdToken) {
-    throw new Error("bkash id token not found");
-  }
-  const executePaymentResponse = await fetch(
-    `${config.bkash_base_url}/tokenized/checkout/execute`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: bkashIdToken,
-        "X-App-Key": config.bkash_app_key,
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    const paymentId = query.paymentID;
+    if (!paymentId) {
+      throw new Error("payment id not found");
+    }
+    const status = query.status;
+    if (!status) {
+      throw new Error("status not found");
+    }
+    const bkashIdToken = await getBkashIdToken();
+    if (!bkashIdToken) {
+      throw new Error("bkash id token not found");
+    }
+    const executePaymentResponse = await fetch(
+      `${config.bkash_base_url}/tokenized/checkout/execute`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: bkashIdToken,
+          "X-App-Key": config.bkash_app_key,
+        },
+        body: JSON.stringify({
+          paymentID: paymentId,
+          status: status,
+        }),
       },
-      body: JSON.stringify({
-        paymentID: paymentId,
-        status: status,
-      }),
-    },
-  );
-  const executePaymentResult = await executePaymentResponse.json();
-  if (status === "success") {
-    return {
-      executePaymentResult,
-      redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=success`,
-    };
-  }
-  if (status === "failure") {
-    return {
-      executePaymentResult,
-      redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=failure`,
-    };
-  }
-  if (status === "cancel") {
-    return {
-      executePaymentResult,
-      redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=cancel`,
-    };
-  }
-
-  return {
-    executePaymentResult,
-    redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory`,
-  };
+    );
+    const executePaymentResult = await executePaymentResponse.json();
+    if (status === "success") {
+      await tx.property.update({
+        where: {
+          id: executePaymentResult.merchantInvoiceNumber,
+        },
+        data: {
+          status: PropertyStatus.RENTED,
+        },
+      });
+      await tx.payment.update({
+        where: {
+          merchantInvoiceNumber: executePaymentResult.merchantInvoiceNumber,
+        },
+        data: {
+          status: PaymentStatus.PAID,
+          bkashTrxId: executePaymentResult.trxID,
+        },
+      });
+      return {
+        redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=success`,
+      };
+    } else if (status === "failure") {
+      await tx.payment.update({
+        where: {
+           bkashPaymentId: paymentId,
+        },
+        data: {
+          status: PaymentStatus.FAILED,
+        },
+      });
+      return {
+        redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=failure`,
+      };
+    } else if (status === "cancel") {
+      await tx.payment.update({
+        where: {
+          bkashPaymentId: paymentId,
+        },
+        data: {
+          status: PaymentStatus.CANCELLED,
+        },
+      });
+      return {
+        redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=cancel`,
+      };
+    } else {
+      return {
+        redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?error=payment-failed`,
+      };
+    }
+  });
+  return transactionResult;
 };
 
 const paymentHistory = async (userId: string) => {

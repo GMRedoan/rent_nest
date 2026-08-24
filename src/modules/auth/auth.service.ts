@@ -91,7 +91,7 @@ const verifyEmail = async (payload: IVerifyEmail) =>{
 
     await redisClient.del(userRegistrationKey);
     const userPayload : IPostUser = JSON.parse(redisUserData);
-        const createdUser = await prisma.user.create({
+    const createdUser = await prisma.user.create({
         data:{
             name: userPayload.name,
             email: userPayload.email,
@@ -177,7 +177,7 @@ const getMyProfile = async (userId: string) => {
 
     return user
 }
-
+ 
 const updateUser = async(payload: IUpdateUserPayload, userId: string) => {
     const user = await prisma.user.findUnique({
         where: {
@@ -235,16 +235,16 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 
 	if (!user) {
 		user = await prisma.user.create({
-			data: {
-				email: googleIdTokenPayload.email,
-				name: googleIdTokenPayload.name,
-                profilePhoto: googleIdTokenPayload.picture,
-				role: Role.TENANT,
-				googleId: googleIdTokenPayload.sub,
-				authProvider: authProvider.GOOGLE,
-                emailVerified: true
- 			},
-		});
+      data: {
+        email: googleIdTokenPayload.email,
+        name: googleIdTokenPayload.name,
+        profilePhoto: googleIdTokenPayload.picture,
+        role: Role.TENANT,
+        googleId: googleIdTokenPayload.sub,
+        authProvider: authProvider.GOOGLE,
+        emailVerified: true,
+      },
+    });
 	}else if (!user.googleId) {
     user = await prisma.user.update({
         where: { id: user.id },

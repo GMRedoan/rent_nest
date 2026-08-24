@@ -1,24 +1,22 @@
 model User {
-    id           String       @id @default(uuid())
-    name         String       @db.VarChar(255)
-    email        String       @unique
-    phone        String?      @db.Text
-    password     String?
-    googleId     String?      @unique
-    authProvider authProvider @default(CREDENTIAL)
-    profilePhoto String?
-    bio          String?
-    role         Role         @default(TENANT)
-    status       UserStatus   @default(ACTIVE)
-    emailVerified Boolean     @default(false)
+  id            String          @id @default(uuid())
+  name          String          @db.VarChar(255)
+  email         String          @unique
+  phone         String?
+  password      String?
+  role          Role            @default(TENANT)
+  status        UserStatus      @default(ACTIVE)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  bio           String?
+  profilePhoto  String?
+  authProvider  authProvider    @default(CREDENTIAL)
+  googleId      String?         @unique
+  emailVerified Boolean         @default(false)
+  payment       Payment[]       @relation("TenantPayments")
+  properties    Property[]      @relation("LandlordProperties")
+  rentalRequest RentalRequest[] @relation("TenantRequests")
+  reviews       Review[]        @relation("TenantReviews")
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    properties    Property[]      @relation("LandlordProperties")
-    rentalRequest RentalRequest[] @relation("TenantRequests")
-    payment       Payment[]       @relation("TenantPayments")
-    reviews       Review[]        @relation("TenantReviews")
-
-    @@map("users")
+  @@map("users")
 }

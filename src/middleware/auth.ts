@@ -19,7 +19,6 @@ declare global {
         }
     }
 }
-
 export const auth = (...requiredRole: Role[]) => {
     return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const token = req.cookies.accessToken ?
@@ -39,7 +38,7 @@ export const auth = (...requiredRole: Role[]) => {
         if (!verifyToken.success) {
             throw new Error(verifyToken.error);
         }
-        const { id, name, phone, email, role } = verifyToken.data as JwtPayload;
+        const { id, role } = verifyToken.data as JwtPayload;
 
         if (requiredRole.length && !requiredRole.includes(role)) {
             throw new Error("You are not allowed to access this route");
@@ -60,7 +59,7 @@ export const auth = (...requiredRole: Role[]) => {
         req.user = {
             id: user.id,
             name: user.name,
-            phone: user.phone,
+            phone: user?.phone ?? "",
             email: user.email,
             role: user.role
         }

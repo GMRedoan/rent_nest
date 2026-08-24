@@ -1,22 +1,19 @@
 model Payment {
-  id             String        @id @default(uuid())
-  amount         Float
-  status         PaymentStatus @default(PENDING)
-  paymentGateway paymentMethod @default(Stripe)
-
-  merchantInvoiceNumber String?  @unique @default("") // rentalRequestId
-  bkashTrxId            String? @unique
-  stripeSessionId       String? @unique
-  stripePaymentIntentId String? @unique
-
-  tenantId String
-  tenant   User   @relation("TenantPayments", fields: [tenantId], references: [id])
-
-  rentalRequestId String        @unique
-  rentalRequest   RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String        @id @default(uuid())
+  amount                Float
+  status                PaymentStatus @default(PENDING)
+  tenantId              String
+  rentalRequestId       String        @unique
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  stripePaymentIntentId String?       @unique
+  stripeSessionId       String?       @unique
+  bkashTrxId            String?       @unique
+  merchantInvoiceNumber String?       @unique @default("")
+  bkashPaymentId        String?       @unique
+  paymentGateway        paymentMethod @default(Stripe)
+  rentalRequest         RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
+  tenant                User          @relation("TenantPayments", fields: [tenantId], references: [id])
 
   @@map("payments")
 }

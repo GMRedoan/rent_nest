@@ -7,8 +7,8 @@ export interface IPostUser {
 }
 
 export interface IVerifyEmail {
-     email: string
-     otp: string
+    email: string
+    otp: string
 }
 
 export interface IUpdateUserPayload{
