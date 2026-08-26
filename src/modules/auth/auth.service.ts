@@ -12,6 +12,8 @@ import { redisClient } from "../../lib/redis"
 import { transporter } from "../../lib/nodeMailer"
 import ejs from "ejs";
 import path from "path"
+import { AppError } from "../../utils/AppError"
+import httpStatus from "http-status"
 
 const postUserIntoDB = async (payload: IPostUser) => {
     const { name, email, phone, password, role } = payload
@@ -132,7 +134,7 @@ const loginUser = async (payload: ILoginUser) => {
         },
     })
     if (!user) {
-        throw new Error("user not found");
+        throw new AppError(httpStatus.NOT_FOUND, "user not found");
     }
 
     if(user.status === "BANNED"){
