@@ -1,11 +1,13 @@
 import { prisma } from "../../lib/prisma";
 import { ICreateReview } from "./review.interface";
+import { AppError } from "../../utils/AppError";
+import httpStatus from "http-status";
 
 const createReview = async (payload: ICreateReview, tenant: string[]) => {
     const tenantId = tenant[0];
 
     if (!tenantId) {
-        throw new Error("invalid tenant information");
+        throw new AppError(httpStatus.BAD_REQUEST, "invalid tenant information");
     }
 
     const property = await prisma.property.findUnique({
@@ -13,7 +15,7 @@ const createReview = async (payload: ICreateReview, tenant: string[]) => {
     });
 
     if (!property) {
-        throw new Error("property not found");
+        throw new AppError(httpStatus.NOT_FOUND, "property not found");
     }
 
     const completedRental = await prisma.rentalRequest.findFirst({
@@ -25,7 +27,7 @@ const createReview = async (payload: ICreateReview, tenant: string[]) => {
     });
 
     if (!completedRental) {
-        throw new Error("you can only review properties you have rented");
+        throw new AppError(httpStatus.BAD_REQUEST, "you can only review properties you have rented");
     }
 
     const review = await prisma.review.create({

@@ -1,5 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { IPropertyFilters } from "./properties.interface";
+import { AppError } from "../../utils/AppError";
+import httpStatus from "http-status";
 
 
 const allProperties = async (filters: IPropertyFilters) => {
@@ -67,7 +69,7 @@ const singleProperty = async(propertyId: string) => {
         } 
     })
     if (!property) {
-        throw new Error("property not found");
+        throw new AppError(httpStatus.NOT_FOUND, "property not found");
     }
     
     const result = await prisma.property.findUnique({

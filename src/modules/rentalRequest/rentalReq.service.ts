@@ -1,5 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { ICreateRentalRequest } from "./rentalReq.interface";
+import { AppError } from "../../utils/AppError";
+import httpStatus from "http-status";
 
 const createRentalRequest = async (payload: ICreateRentalRequest, tenantId: string) => {
     const property = await prisma.property.findUnique({
@@ -7,11 +9,11 @@ const createRentalRequest = async (payload: ICreateRentalRequest, tenantId: stri
     });
 
     if (!property) {
-        throw new Error("property not found");
+        throw new AppError(httpStatus.NOT_FOUND, "property not found");
     }
 
     if (property.status !== "AVAILABLE") {
-        throw new Error("this property is not currently available");
+        throw new AppError(httpStatus.BAD_REQUEST, "this property is not currently available");
     }
 
     const existingPending = await prisma.rentalRequest.findFirst({
@@ -23,7 +25,7 @@ const createRentalRequest = async (payload: ICreateRentalRequest, tenantId: stri
     });
 
     if (existingPending) {
-        throw new Error("you already have a pending request for this property");
+        throw new AppError(httpStatus.CONFLICT, "you already have a pending request for this property");
     }
 
     const existingApproved = await prisma.rentalRequest.findFirst({
@@ -35,7 +37,7 @@ const createRentalRequest = async (payload: ICreateRentalRequest, tenantId: stri
     });
 
     if (existingApproved) {
-        throw new Error("you already have an approved request for this property, you can make payment");
+        throw new AppError(httpStatus.CONFLICT, "you already have an approved request for this property, you can make payment");
     }
 
     const rentalRequest = await prisma.rentalRequest.create({
@@ -66,7 +68,7 @@ const singleRentalRequest = async (rentalRequestId: string) => {
         },
     })
     if (!isExist) {
-        throw new Error("rental request not found");
+        throw new AppError(httpStatus.NOT_FOUND, "rental request not found");
     }
     const rentalRequest = await prisma.rentalRequest.findUnique({
         where: {

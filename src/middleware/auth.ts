@@ -5,6 +5,8 @@ import config from "../config";
 import { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
 import { Role } from "../../generated/prisma/enums";
+import { AppError } from "../utils/AppError";
+import httpStatus from "http-status";
 
 declare global {
     namespace Express {
@@ -30,18 +32,18 @@ export const auth = (...requiredRole: Role[]) => {
                 req.headers.authorization;
 
         if (!token) {
-            throw new Error("You are not logged in");
+            throw new AppError(httpStatus.UNAUTHORIZED, "You are not logged in");
         }
 
         const verifyToken = jwtUtils.verifyToken(token, config.jwt_access_secret);
 
         if (!verifyToken.success) {
-            throw new Error(verifyToken.error);
+            throw new AppError(httpStatus.UNAUTHORIZED, verifyToken.error);
         }
         const { id, role } = verifyToken.data as JwtPayload;
 
         if (requiredRole.length && !requiredRole.includes(role)) {
-            throw new Error("You are not allowed to access this route");
+            throw new AppError(httpStatus.FORBIDDEN, "You are not allowed to access this route");
         }
 
         const user = await prisma.user.findUniqueOrThrow({
@@ -50,10 +52,10 @@ export const auth = (...requiredRole: Role[]) => {
             }
         });
         if (!user) {
-            throw new Error("user not found");
+            throw new AppError(httpStatus.NOT_FOUND, "user not found");
         }
         if (user.status === "BANNED") {
-            throw new Error("Your account is banned, please contact support");
+            throw new AppError(httpStatus.FORBIDDEN, "Your account is banned, please contact support");
         }
 
         req.user = {

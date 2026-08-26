@@ -4,6 +4,8 @@ import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
 import { getBkashIdToken } from "../../lib/bkash";
 import { PaymentStatus, PropertyStatus } from "../../../generated/prisma/enums";
+import { AppError } from "../../utils/AppError";
+import httpStatus from "http-status";
 
 export const createPayment = async (
   rentalRequestId: string,
@@ -19,15 +21,15 @@ export const createPayment = async (
   });
 
   if (!rentalRequest) {
-    throw new Error("rental request not found");
+    throw new AppError(httpStatus.NOT_FOUND, "rental request not found");
   }
 
   if (rentalRequest.tenantId !== tenantId) {
-    throw new Error("you are not authorized to pay for this request");
+    throw new AppError(httpStatus.FORBIDDEN, "you are not authorized to pay for this request");
   }
 
   if (rentalRequest.status !== "APPROVED") {
-    throw new Error("payment can only be made for approved rental requests");
+    throw new AppError(httpStatus.BAD_REQUEST, "payment can only be made for approved rental requests");
   }
 
   const existingPayment = await prisma.payment.findFirst({
@@ -40,7 +42,7 @@ export const createPayment = async (
   });
 
   if (existingPayment?.status === "PAID") {
-    throw new Error("this rental request has already been paid for");
+    throw new AppError(httpStatus.BAD_REQUEST, "this rental request has already been paid for");
   }
 
   const session = await stripe.checkout.sessions.create({
@@ -92,7 +94,7 @@ const confirmPayment = async (rawBody: Buffer, signature: string) => {
       config.stripe_webhook_secret as string,
     );
   } catch (err) {
-    throw new Error(`webhook signature verification failed: ${err}`);
+    throw new AppError(httpStatus.BAD_REQUEST, `webhook signature verification failed: ${err}`);
   }
 
   if (event.type === "checkout.session.completed") {
@@ -103,7 +105,7 @@ const confirmPayment = async (rawBody: Buffer, signature: string) => {
     });
 
     if (!payment) {
-      throw new Error("payment record not found for this session");
+      throw new AppError(httpStatus.NOT_FOUND, "payment record not found for this session");
     }
 
     const rentalRequest = await prisma.rentalRequest.findUnique({
@@ -111,7 +113,7 @@ const confirmPayment = async (rawBody: Buffer, signature: string) => {
     });
 
     if (!rentalRequest) {
-      throw new Error("rental request not found for this payment");
+      throw new AppError(httpStatus.NOT_FOUND, "rental request not found for this payment");
     }
 
     await prisma.$transaction([
@@ -172,15 +174,15 @@ const bkashPayment = async (rentalRequestId: string, tenantId: string) => {
     });
 
     if (!rentalRequest) {
-      throw new Error("rental request not found");
+      throw new AppError(httpStatus.NOT_FOUND, "rental request not found");
     }
 
     if (rentalRequest.tenantId !== tenantId) {
-      throw new Error("you are not authorized to pay for this request");
+      throw new AppError(httpStatus.FORBIDDEN, "you are not authorized to pay for this request");
     }
 
     if (rentalRequest.status !== "APPROVED") {
-      throw new Error("payment can only be made for approved rental requests");
+      throw new AppError(httpStatus.BAD_REQUEST, "payment can only be made for approved rental requests");
     }
 
     const existingPayment = await prisma.payment.findFirst({
@@ -193,12 +195,12 @@ const bkashPayment = async (rentalRequestId: string, tenantId: string) => {
     });
 
     if (existingPayment?.status === "PAID") {
-      throw new Error("this rental request has already been paid for");
+      throw new AppError(httpStatus.BAD_REQUEST, "this rental request has already been paid for");
     }
 
     const bkashIdToken = await getBkashIdToken();
     if (!bkashIdToken) {
-      throw new Error("bkash id token not found");
+      throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "bkash id token not found");
     }
     const bkashCreatePaymentResponse = await fetch(
       `${config.bkash_base_url}/tokenized/checkout/create`,
@@ -246,15 +248,15 @@ const bkashPaymentCallback = async (query: Record<string, any>) => {
   const transactionResult = await prisma.$transaction(async (tx) => {
     const paymentId = query.paymentID;
     if (!paymentId) {
-      throw new Error("payment id not found");
+      throw new AppError(httpStatus.NOT_FOUND, "payment id not found");
     }
     const status = query.status;
     if (!status) {
-      throw new Error("status not found");
+      throw new AppError(httpStatus.NOT_FOUND, "status not found");
     }
     const bkashIdToken = await getBkashIdToken();
     if (!bkashIdToken) {
-      throw new Error("bkash id token not found");
+      throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "bkash id token not found");
     }
     const executePaymentResponse = await fetch(
       `${config.bkash_base_url}/tokenized/checkout/execute`,

@@ -1,6 +1,8 @@
 import { RequestStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma"
 import { IProperties, IUpdateProperties } from "./lanlordProperties.interface"
+import { AppError } from "../../utils/AppError";
+import httpStatus from "http-status";
 
 const createProperties = async (payload: IProperties, landlordId: string) => {
     let categoryId = payload.categoryId;
@@ -12,7 +14,7 @@ const createProperties = async (payload: IProperties, landlordId: string) => {
         });
 
         if (!category) {
-            throw new Error(`no category found for property type ${payload.propertyType}`);
+            throw new AppError(httpStatus.NOT_FOUND, `no category found for property type ${payload.propertyType}`);
         }
 
         categoryId = category.id;
@@ -48,10 +50,10 @@ const updateProperties = async (payload: IUpdateProperties, propertiesId: string
         }
     })
     if (!property) {
-        throw new Error("property not found");
+        throw new AppError(httpStatus.NOT_FOUND, "property not found");
     }
     if (property?.landlordId !== landlordId) {
-        throw new Error("you are not authorized to update this property");
+        throw new AppError(httpStatus.FORBIDDEN, "you are not authorized to update this property");
     }
     const createdProperty = await prisma.property.update({
         where: {
@@ -72,10 +74,10 @@ const deleteProperty = async (propertiesId: string, landlordId: string) => {
         }
     })
     if (!property) {
-        throw new Error("property not found");
+        throw new AppError(httpStatus.NOT_FOUND, "property not found");
     }
     if (property?.landlordId !== landlordId) {
-        throw new Error("you are not authorized to delete this property");
+        throw new AppError(httpStatus.FORBIDDEN, "you are not authorized to delete this property");
     }
     await prisma.property.delete({
         where: {
@@ -116,10 +118,10 @@ const updateRentalRequest = async (status: RequestStatus, rentalRequestId: strin
         }
     })
     if (!rentalRequest) {
-        throw new Error("rental request not found");
+        throw new AppError(httpStatus.NOT_FOUND, "rental request not found");
     }
     if(rentalRequest?.property?.landlordId !== landlordId) {
-        throw new Error("you are not authorized to update this rental request");
+        throw new AppError(httpStatus.FORBIDDEN, "you are not authorized to update this rental request");
     }
     const updatedRentalRequest = await prisma.$transaction(async (tx) => {
         const updated = await tx.rentalRequest.update({

@@ -23,7 +23,7 @@ const postUserIntoDB = async (payload: IPostUser) => {
         }
     })
     if (isExist) {
-        throw new Error("user already exist");
+        throw new AppError(httpStatus.CONFLICT, "user already exist");
     }
 
     const hashedPassword = await bcrypt.hash(password, Number(config.bycrypt_salt_rounds))
@@ -70,25 +70,25 @@ const verifyEmail = async (payload: IVerifyEmail) =>{
         where: {email}
     })
     if (isExist?.emailVerified === true) {
-        throw new Error("user is already verified");
+        throw new AppError(httpStatus.BAD_REQUEST, "user is already verified");
     }
     if(isExist?.status === "BANNED"){
-        throw new Error("user is banned, please contact support");
+        throw new AppError(httpStatus.FORBIDDEN, "user is banned, please contact support");
     }
     const otpKey = `user-verification-otp:${email}`;
     const redisOtp = await redisClient.get(otpKey);
     if(!redisOtp){
-        throw new Error("otp not found");
+        throw new AppError(httpStatus.NOT_FOUND, "otp not found");
     }
     if(redisOtp !== otp){
-        throw new Error("invalid otp");
+        throw new AppError(httpStatus.BAD_REQUEST, "invalid otp");
     }
     await redisClient.del(otpKey);
 
     const userRegistrationKey = `user-registration:${email}`;
     const redisUserData = await redisClient.get(userRegistrationKey);
     if(!redisUserData){
-        throw new Error("user data not found");
+        throw new AppError(httpStatus.NOT_FOUND, "user data not found");
     }
 
     await redisClient.del(userRegistrationKey);
@@ -138,15 +138,15 @@ const loginUser = async (payload: ILoginUser) => {
     }
 
     if(user.status === "BANNED"){
-        throw new Error("user is banned, please contact support");
+        throw new AppError(httpStatus.FORBIDDEN, "user is banned, please contact support");
     }
     if(user.emailVerified === false){
-        throw new Error("user is not verified, please verify your email");
+        throw new AppError(httpStatus.BAD_REQUEST, "user is not verified, please verify your email");
     }
 
     const isPasswordMatched = await bcrypt.compare(password, user.password as string);
     if (!isPasswordMatched) {
-        throw new Error("password not matched");
+        throw new AppError(httpStatus.UNAUTHORIZED, "password not matched");
     }
 
     const jwtPayload = {
@@ -187,10 +187,10 @@ const updateUser = async(payload: IUpdateUserPayload, userId: string) => {
         }
     })
     if (!user) {
-        throw new Error("user not found");
+        throw new AppError(httpStatus.NOT_FOUND, "user not found");
     }
     if(user.status === "BANNED"){
-        throw new Error("user is banned, please contact support");
+        throw new AppError(httpStatus.FORBIDDEN, "user is banned, please contact support");
     }
     const updatedUser = await prisma.user.update({
         where: {
@@ -218,16 +218,16 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 		googleIdTokenPayload = ticket.getPayload();
 	} catch (error) {
 		console.log("Error verifying Google ID token:", error);
-		throw new Error("Invalid Google ID token");
+		throw new AppError(httpStatus.UNAUTHORIZED, "Invalid Google ID token");
 	}
 	if (!googleIdTokenPayload) {
-		throw new Error("Invalid Google ID token");
+		throw new AppError(httpStatus.UNAUTHORIZED, "Invalid Google ID token");
 	}
 	if (!googleIdTokenPayload.email) {
-		throw new Error("Invalid Google ID token");
+		throw new AppError(httpStatus.UNAUTHORIZED, "Invalid Google ID token");
 	}
 	if (!googleIdTokenPayload.name) {
-		throw new Error("Invalid Google ID token");
+		throw new AppError(httpStatus.UNAUTHORIZED, "Invalid Google ID token");
 	}
 	let user = await prisma.user.findUnique({
 		where: {
@@ -292,16 +292,16 @@ const forgotPassword = async (payload: IForgotPasswordPayload) => {
         }
     })
     if(!isUserExists) {
-        throw new Error("user not found");
+        throw new AppError(httpStatus.NOT_FOUND, "user not found");
     }
     if(!isUserExists.emailVerified){
-        throw new Error("user email is not verified");
+        throw new AppError(httpStatus.BAD_REQUEST, "user email is not verified");
     }
     if(isUserExists.status === "BANNED"){
-        throw new Error("user is banned, please contact support");
+        throw new AppError(httpStatus.FORBIDDEN, "user is banned, please contact support");
     }
     if(isUserExists.googleId && isUserExists.authProvider === "GOOGLE"){ 
-        throw new Error("user is registered with google, please use google login");
+        throw new AppError(httpStatus.BAD_REQUEST, "user is registered with google, please use google login");
     };
     const otp = crypto.randomInt(100000, 1000000).toString();
     const key = `forgot-password-otp:${isUserExists.email}`;
@@ -331,26 +331,26 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
         }
     })
     if(!isUserExists) {
-        throw new Error("user not found");
+        throw new AppError(httpStatus.NOT_FOUND, "user not found");
     }
     if(!isUserExists.emailVerified){
-        throw new Error("user email is not verified");
+        throw new AppError(httpStatus.BAD_REQUEST, "user email is not verified");
     }
     if(isUserExists.status === "BANNED"){
-        throw new Error("user is banned, please contact support");
+        throw new AppError(httpStatus.FORBIDDEN, "user is banned, please contact support");
     }
     if(isUserExists.googleId && isUserExists.authProvider === "GOOGLE"){ 
-        throw new Error("user is registered with google, please use google login");
+        throw new AppError(httpStatus.BAD_REQUEST, "user is registered with google, please use google login");
     };
 
     const key = `forgot-password-otp:${isUserExists.email}`;
     const redisOtp = await redisClient.get(key);
 
     if(!redisOtp){
-        throw new Error("otp not found");
+        throw new AppError(httpStatus.NOT_FOUND, "otp not found");
     }
     if(redisOtp !== otp){
-        throw new Error("invalid otp");
+        throw new AppError(httpStatus.BAD_REQUEST, "invalid otp");
     }
 
     const newHashedPassword = await bcrypt.hash(newPassword, Number(config.bycrypt_salt_rounds));

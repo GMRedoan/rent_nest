@@ -1,6 +1,8 @@
 import { UserStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { ICreateCategory, IUpdateCategory } from "./admin.interface";
+import { AppError } from "../../utils/AppError";
+import httpStatus from "http-status";
 
 const allUsers = async () => {
     const users = await prisma.user.findMany({
@@ -18,7 +20,7 @@ const updateUserStatus = async (userId: string, status: UserStatus) => {
         }
     })
     if (!isExist) {
-        throw new Error("user not found");
+        throw new AppError(httpStatus.NOT_FOUND, "user not found");
     }
     const isAdmin = await prisma.user.findUnique({
         where: {
@@ -29,7 +31,7 @@ const updateUserStatus = async (userId: string, status: UserStatus) => {
         }
     })
     if (isAdmin?.role === "ADMIN") {
-        throw new Error("cannot update admin status");
+        throw new AppError(httpStatus.BAD_REQUEST, "cannot update admin status");
     }
 
     const user = await prisma.user.update({
@@ -70,7 +72,7 @@ const updateCategory = async (id: string, payload: IUpdateCategory) => {
         }
     })
     if (!isExist) {
-        throw new Error("category not found");
+        throw new AppError(httpStatus.NOT_FOUND, "category not found");
     }
     const isExistName = await prisma.category.findUnique({
         where: {
@@ -78,7 +80,7 @@ const updateCategory = async (id: string, payload: IUpdateCategory) => {
         }
     })
     if (isExistName) {
-        throw new Error("category name already exist");
+        throw new AppError(httpStatus.CONFLICT, "category name already exist");
     }
     const UpdatedCategory = await prisma.category.update({
         where: {
@@ -96,7 +98,7 @@ const deleteCategory = async (id: string) => {
         }
     })
     if (!isExist) {
-        throw new Error("category not found");
+        throw new AppError(httpStatus.NOT_FOUND, "category not found");
     }
     await prisma.category.delete({
         where: {
