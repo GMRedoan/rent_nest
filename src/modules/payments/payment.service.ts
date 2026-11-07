@@ -7,7 +7,7 @@ import { PaymentStatus, PropertyStatus } from "../../../generated/prisma/enums";
 import { AppError } from "../../utils/AppError";
 import httpStatus from "http-status";
 
-export const createPayment = async (
+const createPayment = async (
   rentalRequestId: string,
   tenantId: string,
 ) => {

@@ -14,7 +14,7 @@ import ejs from "ejs";
 import path from "path"
 import { AppError } from "../../utils/AppError"
 import httpStatus from "http-status"
-
+ 
 const postUserIntoDB = async (payload: IPostUser) => {
     const { name, email, phone, password, role } = payload
     const isExist = await prisma.user.findUnique({

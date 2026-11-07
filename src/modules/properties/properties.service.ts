@@ -62,6 +62,7 @@ const allProperties = async (filters: IPropertyFilters) => {
         }
     };
 };
+
 const singleProperty = async(propertyId: string) => {
     const property = await prisma.property.findUnique({
         where: {
