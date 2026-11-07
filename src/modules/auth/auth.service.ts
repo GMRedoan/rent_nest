@@ -94,18 +94,19 @@ const verifyEmail = async (payload: IVerifyEmail) =>{
     await redisClient.del(userRegistrationKey);
     const userPayload : IPostUser = JSON.parse(redisUserData);
     const createdUser = await prisma.user.create({
-        data:{
-            name: userPayload.name,
-            email: userPayload.email,
-            phone: userPayload.phone,
-            role: userPayload.role,
-            password: userPayload.password,
-            emailVerified: true
-         },
-         omit: {
-            password: true
-         }
-    })
+      data: {
+        name: userPayload.name,
+        email: userPayload.email,
+        phone: userPayload.phone,
+        role: userPayload.role,
+        password: userPayload.password,
+        emailVerified: true,
+        profilePhoto: "https://i.ibb.co.com/yB0sDhYg/user.png",
+      },
+      omit: {
+        password: true,
+      },
+    });
 
     const jwtPayload = {
         id: createdUser.id,
