@@ -60,7 +60,7 @@ const createPayment = async (
         quantity: 1,
       },
     ],
-    success_url: `${config.app_url}/properties?success=true`,
+    success_url: `${config.app_url}/dashboard/tenant/paymentHistory?success=true`,
     cancel_url: `${config.app_url}/dashboard/tenant/myRequests?success=false`,
     metadata: {
       rentalRequestId,
