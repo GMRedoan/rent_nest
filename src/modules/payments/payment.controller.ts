@@ -34,7 +34,7 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
 const bkashPayment = catchAsync(async (req: Request, res: Response) => {
   const { rentalRequestId } = req.body;
   const tenantId = req.user?.id;
-  const result = await paymentService.bkashPayment(
+  const payment = await paymentService.bkashPayment(
     rentalRequestId,
     tenantId as string,
   );
@@ -42,7 +42,7 @@ const bkashPayment = catchAsync(async (req: Request, res: Response) => {
     statusCode: httpStatus.OK,
     success: true,
     message: "payment created successfully",
-    data: result,
+    data: { payment },
   });
 });
 

@@ -215,7 +215,7 @@ const bkashPayment = async (rentalRequestId: string, tenantId: string) => {
         body: JSON.stringify({
           mode: "0011",
           payerReference: rentalRequest.tenant.email,
-          callbackURL: `${config.app_url}/payments/callback`,
+          callbackURL: `${config.backend_url}/payments/callback`,
           amount: rentalRequest.property.price,
           currency: "BDT",
           intent: "sale",
@@ -251,8 +251,8 @@ const bkashPayment = async (rentalRequestId: string, tenantId: string) => {
     });
 
     return {
-      paymentUrl : bkashCreatePaymentResult.bkashURL
-    }
+      checkoutUrl: bkashCreatePaymentResult.bkashURL,
+    };
   });
 
   return transactionResult;
