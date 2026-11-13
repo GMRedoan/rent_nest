@@ -224,6 +224,20 @@ const bkashPayment = async (rentalRequestId: string, tenantId: string) => {
       },
     );
     const bkashCreatePaymentResult = await bkashCreatePaymentResponse.json();
+
+    if (
+      !bkashCreatePaymentResult.paymentID ||
+      !bkashCreatePaymentResult.bkashURL
+    ) {
+      console.error("BKASH CREATE PAYMENT ERROR:", bkashCreatePaymentResult);
+
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        bkashCreatePaymentResult.statusMessage ||
+          "Unable to create bKash payment",
+      );
+    }
+
     // create payment model
     await tx.payment.create({
       data: {
@@ -245,88 +259,130 @@ const bkashPayment = async (rentalRequestId: string, tenantId: string) => {
 };
 
 const bkashPaymentCallback = async (query: Record<string, any>) => {
-  const transactionResult = await prisma.$transaction(async (tx) => {
-    const paymentId = query.paymentID;
-    if (!paymentId) {
-      throw new AppError(httpStatus.NOT_FOUND, "payment id not found");
-    }
-    const status = query.status;
-    if (!status) {
-      throw new AppError(httpStatus.NOT_FOUND, "status not found");
-    }
-    const bkashIdToken = await getBkashIdToken();
-    if (!bkashIdToken) {
-      throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "bkash id token not found");
-    }
-    const executePaymentResponse = await fetch(
-      `${config.bkash_base_url}/tokenized/checkout/execute`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: bkashIdToken,
-          "X-App-Key": config.bkash_app_key,
-        },
-        body: JSON.stringify({
-          paymentID: paymentId,
-          status: status,
-        }),
+  const paymentId = query.paymentID;
+  const callbackStatus = query.status?.toLowerCase();
+
+  if (!paymentId) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Payment ID not found");
+  }
+
+  if (!callbackStatus) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Payment status not found");
+  }
+
+  if (callbackStatus === "failure" || callbackStatus === "cancel") {
+    const paymentStatus =
+      callbackStatus === "failure"
+        ? PaymentStatus.FAILED
+        : PaymentStatus.CANCELLED;
+
+    await prisma.payment.updateMany({
+      where: {
+        bkashPaymentId: paymentId,
+        status: PaymentStatus.PENDING,
       },
+      data: {
+        status: paymentStatus,
+      },
+    });
+
+    return {
+      redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=${callbackStatus}`,
+    };
+  }
+
+  if (callbackStatus !== "success") {
+    return {
+      redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?error=payment-failed`,
+    };
+  }
+
+  const bkashIdToken = await getBkashIdToken();
+
+  if (!bkashIdToken) {
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "bKash ID token not found",
     );
-    const executePaymentResult = await executePaymentResponse.json();
-    if (status === "success") {
-      await tx.property.update({
-        where: {
-          id: executePaymentResult.merchantInvoiceNumber,
+  }
+
+  const executePaymentResponse = await fetch(
+    `${config.bkash_base_url}/tokenized/checkout/execute`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: bkashIdToken,
+        "X-App-Key": config.bkash_app_key,
+      },
+      body: JSON.stringify({
+        paymentID: paymentId,
+      }),
+    },
+  );
+
+  const executePaymentResult = await executePaymentResponse.json();
+
+  console.log("BKASH EXECUTE RESPONSE:", executePaymentResult);
+
+  if (
+    !executePaymentResponse.ok ||
+    executePaymentResult.statusCode !== "0000" ||
+    executePaymentResult.transactionStatus !== "Completed" ||
+    !executePaymentResult.trxID
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      executePaymentResult.statusMessage || "bKash payment execution failed",
+    );
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const payment = await tx.payment.findFirst({
+      where: {
+        bkashPaymentId: paymentId,
+      },
+      include: {
+        rentalRequest: {
+          include: {
+            property: true,
+          },
         },
-        data: {
-          status: PropertyStatus.RENTED,
-        },
-      });
-      await tx.payment.update({
-        where: {
-          merchantInvoiceNumber: executePaymentResult.merchantInvoiceNumber,
-        },
-        data: {
-          status: PaymentStatus.PAID,
-          bkashTrxId: executePaymentResult.trxID,
-        },
-      });
-      return {
-        redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=success`,
-      };
-    } else if (status === "failure") {
-      await tx.payment.update({
-        where: {
-           bkashPaymentId: paymentId,
-        },
-        data: {
-          status: PaymentStatus.FAILED,
-        },
-      });
-      return {
-        redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=failure`,
-      };
-    } else if (status === "cancel") {
-      await tx.payment.update({
-        where: {
-          bkashPaymentId: paymentId,
-        },
-        data: {
-          status: PaymentStatus.CANCELLED,
-        },
-      });
-      return {
-        redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=cancel`,
-      };
-    } else {
-      return {
-        redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?error=payment-failed`,
-      };
+      },
+    });
+
+    if (!payment) {
+      throw new AppError(httpStatus.NOT_FOUND, "Payment record not found");
     }
+
+    if (payment.status === PaymentStatus.PAID) {
+      return;
+    }
+
+    await tx.payment.update({
+      where: {
+        id: payment.id,
+      },
+      data: {
+        status: PaymentStatus.PAID,
+        bkashTrxId: executePaymentResult.trxID,
+      },
+    });
+
+    await tx.property.update({
+      where: {
+        id: payment.rentalRequest.property.id,
+      },
+      data: {
+        status: PropertyStatus.RENTED,
+      },
+    });
   });
-  return transactionResult;
+
+  return {
+    redirectUrl: `${config.app_url}/dashboard/tenant/paymentHistory?status=success`,
+  };
 };
 
 const paymentHistory = async (userId: string) => {

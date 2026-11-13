@@ -46,23 +46,6 @@ app.use("/api/reviews", reviewsRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/payments", paymentsRouter);
 
-// test
-app.get("/test", async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const grantIdToken = await getBkashIdToken();
-        console.log(grantIdToken);
-
-        sendResponse(res, {
-            success: true,
-            statusCode: 200,
-            message: "test",
-            data: grantIdToken
-        })
-    } catch (error) {
-         next(error);
-    }
-});
-
 app.use(globalError);
 app.use(notFound);
 
